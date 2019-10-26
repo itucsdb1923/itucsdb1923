@@ -1,12 +1,17 @@
 import sys
-from flask import Flask, render_template
-
+from flask import Flask, render_template, jsonify
 
 app = Flask(__name__)
 
 
-@app.route("/")
-def home_page():
+@app.route("/api")
+def api():
+    return jsonify(["API goes here lol"])
+
+
+@app.route("/", defaults={"route": None})
+@app.route("/<route>")
+def home_page(route):
     return render_template("main.html")
 
 
