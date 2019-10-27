@@ -1,133 +1,9 @@
 import os
 import sys
 
+from db import db_url
 import psycopg2 as dbapi2
-
-
-INIT_STATEMENTS = [
-    "CREATE TABLE IF NOT EXISTS DUMMY (NUM INTEGER)",
-    "INSERT INTO DUMMY VALUES (42)",
-]
-
-
-
-def initialize(url):
-    with dbapi2.connect(url) as connection:
-        cursor = connection.cursor()
-        for statement in INIT_STATEMENTS:
-            cursor.execute(statement)
-        cursor.close()
-
-# CREATE TABLES------------------------------------------------------------------------
-
-    with dbapi2.connect(url) as connection:
-        cursor = connection.cursor()
-        statement = """CREATE TABLE PERSON (
-            ID SERIAL PRIMARY KEY,
-            NAME VARCHAR(40) UNIQUE NOT NULL
-        )"""
-        cursor.execute(statement)
-        cursor.close()  
-    with dbapi2.connect(url) as connection:
-        cursor = connection.cursor()
-        statement = """CREATE TABLE MOVIE (
-            ID SERIAL PRIMARY KEY,
-            TITLE VARCHAR(80),
-            DESCRIPTION VARCHAR,
-            YR NUMERIC(4),
-            IMDBSCORE FLOAT,
-            SCORE FLOAT DEFAULT 0.0,
-            VOTES INTEGER DEFAULT 0,
-            DIRECTORID INTEGER REFERENCES PERSON (ID)
-        )"""
-        cursor.execute(statement)
-        cursor.close()  
-    with dbapi2.connect(url) as connection:
-        with connection.cursor() as cursor:
-            statement = """CREATE TABLE CASTING (
-                MOVIEID INTEGER REFERENCES MOVIE (ID),
-                ACTORID INTEGER REFERENCES PERSON (ID),
-                ORD INTEGER,
-                PRIMARY KEY (MOVIEID, ACTORID)
-            )"""
-            cursor.execute(statement)
-
-    with dbapi2.connect(url) as connection:
-        cursor = connection.cursor()
-        statement = """CREATE TABLE BOOK (
-            ID SERIAL PRIMARY KEY,
-            TITLE VARCHAR(80),
-            DESCRIPTION VARCHAR,
-            YR NUMERIC(4),
-            PAGENUMBER INTEGER,
-            SCORE FLOAT DEFAULT 0.0,
-            VOTES INTEGER DEFAULT 0,
-            AUTHORID INTEGER REFERENCES PERSON (ID)
-        )"""
-        cursor.execute(statement)
-        cursor.close() 
-
-    with dbapi2.connect(url) as connection:
-        cursor = connection.cursor()
-        statement = """CREATE TABLE MUSIC (
-            ID SERIAL PRIMARY KEY,
-            TITLE VARCHAR(80),
-            ALBUM VARCHAR(80),
-            YR NUMERIC(4),
-            SCORE FLOAT DEFAULT 0.0,
-            VOTES INTEGER DEFAULT 0,
-            SINGERID INTEGER REFERENCES PERSON (ID)
-        )"""
-        cursor.execute(statement)
-        cursor.close() 
-    with dbapi2.connect(url) as connection:
-        cursor = connection.cursor()
-        statement = """CREATE TABLE USER (
-            NAME VARCHAR(80) PRIMARY KEY,
-            PASSWORD VARCHAR(80)
-        )"""
-        cursor.execute(statement)
-        cursor.close()  
-    with dbapi2.connect(url) as connection:
-        cursor = connection.cursor()
-        statement = """CREATE TABLE LIST (
-            ID SERIAL PRIMARY KEY,
-            NAME VARCHAR(80),
-            DATE DATETIME,
-            USERID INTEGER REFERENCES USER (ID)
-        )"""
-        cursor.execute(statement)
-        cursor.close()  
-    with dbapi2.connect(url) as connection:
-        cursor = connection.cursor()
-        statement = """CREATE TABLE CONTENT (
-            USERID INTEGER REFERENCES LIST (ID),
-            MOVIEID INTEGER REFERENCES MOVIE (ID) DEFAULT 0,
-            BOOKID INTEGER REFERENCES BOOK (ID) DEFAULT 0,
-            MUSICID INTEGER REFERENCES MUSIC (ID) DEFAULT 0,
-            PRIMARY KEY (USERID, MOVIEID, BOOKID, MUSICID)
-        )"""
-        cursor.execute(statement)
-        cursor.close()  
-    with dbapi2.connect(url) as connection:
-        cursor = connection.cursor()
-        statement = """CREATE TABLE BOOKGENRES (
-            BOOKID INTEGER REFERENCES BOOK (ID),
-            GENREID INTEGER REFERENCES GENRES (ID) ,
-            PRIMARY KEY (USERID, GENREID)
-        )"""
-        cursor.execute(statement)
-        cursor.close()  
-    with dbapi2.connect(url) as connection:
-        cursor = connection.cursor()
-        statement = """CREATE TABLE GENRES (
-            ID SERIAL PRIMARY KEY,
-            NAME VARCHAR(80)
-        )"""
-        cursor.execute(statement)
-        cursor.close()   
-    
-#INSERT DATA--------------------------------------------------------------------------------------
+from operations import createUser, createList
 
 movie_data = [
     {'title': "The Godfather",
@@ -210,7 +86,7 @@ movie_data = [
      'votes': 3,
      'director': "Steven Spielberg",
      'cast': ["Tom Hanks", "Matt Damon"]}
-]  
+]
 
 book_data = [
     {'title': "Crime and Punishment",
@@ -220,7 +96,7 @@ book_data = [
      'score': 8.7,
      'votes': 3,
      'author': "Fyodor Dostoyevsky",
-     'genres': ["Psychological Fiction","Philosophical fiction"]},
+     'genres': ["Psychological Fiction", "Philosophical fiction"]},
     {'title': "The Brothers Karamazov",
      'description': "The Brothers Karamazov, also translated as The Karamazov Brothers, is the final novel by the Russian author Fyodor Dostoevsky. Dostoevsky spent nearly two years writing The Brothers Karamazov, which was published as a serial in The Russian Messenger from January 1879 to November 1880.",
      'year': 1880,
@@ -236,7 +112,7 @@ book_data = [
      'score': 7.1,
      'votes': 3,
      'author': "J. K. Rowling",
-     'genres': ["Novel","Fantasy Fiction"]},
+     'genres': ["Novel", "Fantasy Fiction"]},
     {'title': "The Da Vinci Code",
      'description': "The Da Vinci Code is a 2003 mystery thriller novel by Dan Brown. It is Brown's second novel to include the character Robert Langdon: the first was his 2000 novel Angels & Demons",
      'year': 2000,
@@ -252,7 +128,7 @@ book_data = [
      'score': 7.0,
      'votes': 1,
      'author': "Franz Kafka",
-     'genres': ["Fantasy Fiction","Absurdist fiction"]},
+     'genres': ["Fantasy Fiction", "Absurdist fiction"]},
     {'title': "Snow",
      'description': "Snow is a postmodern novel by Turkish writer Orhan Pamuk. Published in Turkish in 2002, it was translated into English by Maureen Freely and published in 2004.",
      'year': 2002,
@@ -284,7 +160,7 @@ book_data = [
      'score': 7.5,
      'votes': 2,
      'author': "Victor Hugo",
-     'genres': ["Historical Fiction","Epic"]},
+     'genres': ["Historical Fiction", "Epic"]},
     {'title': "The Hobbit",
      'description': "The Hobbit, or There and Back Again is a children's fantasy novel by English author J. R. R. Tolkien. It was published on 21 September 1937 to wide critical acclaim, being nominated for the Carnegie Medal and awarded a prize from the New York Herald Tribune for best juvenile fiction.",
      'year': 1937,
@@ -292,7 +168,7 @@ book_data = [
      'score': 7.8,
      'votes': 3,
      'author': "J. R. R. Tolkien",
-     'genres': ["Epic","Fantasy Fiction","High fantasy"]}
+     'genres': ["Epic", "Fantasy Fiction", "High fantasy"]}
 ]
 
 music_data = [
@@ -359,153 +235,201 @@ music_data = [
 ]
 
 
+INIT_STATEMENTS = [
+    """DO $$ DECLARE
+            r RECORD;
+        BEGIN
+            FOR r IN (SELECT tablename FROM pg_tables WHERE schemaname = current_schema()) LOOP
+                EXECUTE 'DROP TABLE IF EXISTS ' || quote_ident(r.tablename) || ' CASCADE';
+            END LOOP;
+        END $$;""",
+    """CREATE TABLE PERSON(
+            ID SERIAL PRIMARY KEY,
+            NAME VARCHAR(40) NOT NULL)""",
+    """CREATE TABLE MOVIE (
+            ID SERIAL PRIMARY KEY,
+            TITLE VARCHAR(80),
+            DESCRIPTION VARCHAR,
+            YR INTEGER,
+            IMDBSCORE FLOAT,
+            SCORE FLOAT DEFAULT 0.0,
+            VOTES INTEGER DEFAULT 0,
+            DIRECTORID INTEGER REFERENCES PERSON (ID))""",
+    """CREATE TABLE CASTING (
+            MOVIEID INTEGER REFERENCES MOVIE (ID),
+            ACTORID INTEGER REFERENCES PERSON (ID),
+            ORD INTEGER,
+            PRIMARY KEY (MOVIEID, ACTORID))""",
+    """CREATE TABLE BOOK (
+            ID SERIAL PRIMARY KEY,
+            TITLE VARCHAR(80),
+            DESCRIPTION VARCHAR,
+            YR INTEGER,
+            PAGENUMBER INTEGER,
+            SCORE FLOAT DEFAULT 0.0,
+            VOTES INTEGER DEFAULT 0,
+            AUTHORID INTEGER REFERENCES PERSON (ID))""",
+    """CREATE TABLE MUSIC (
+            ID SERIAL PRIMARY KEY,
+            TITLE VARCHAR(80),
+            ALBUM VARCHAR(80),
+            YR INTEGER,
+            SCORE FLOAT DEFAULT 0.0,
+            VOTES INTEGER DEFAULT 0,
+            SINGERID INTEGER REFERENCES PERSON (ID))""",
+    """CREATE TABLE USERS (
+            ID SERIAL PRIMARY KEY,
+            NAME VARCHAR(80),
+            PASSWORD VARCHAR(80))""",
+    """CREATE TABLE LIST (
+            ID SERIAL PRIMARY KEY,
+            NAME VARCHAR(80),
+            DATE DATE,
+            USERID INTEGER REFERENCES USERS (ID))""",
+    """CREATE TABLE GENRE (
+            ID SERIAL PRIMARY KEY,
+            NAME VARCHAR(80))""",
+    """CREATE TABLE BOOKGENRE (
+            BOOKID INTEGER REFERENCES BOOK (ID),
+            GENREID INTEGER REFERENCES GENRE (ID) ,
+            PRIMARY KEY (BOOKID, GENREID))""",
+
+]
 
 
-person_ids = {}
-genres_ids = {}
-with dbapi2.connect(url) as connection:
-    with connection.cursor() as cursor:
-        for item in movie_data:
-            person_names = [item['director']] + item['cast']
-            for name in person_names:
-                if name not in person_ids:
+def initialize(url):
+    with dbapi2.connect(url) as connection:
+        cursor = connection.cursor()
+        for statement in INIT_STATEMENTS:
+            cursor.execute(statement)
+        cursor.close()
+
+    person_ids = {}
+    genres_ids = {}
+    with dbapi2.connect(url) as connection:
+        with connection.cursor() as cursor:
+            for item in movie_data:
+                person_names = [item['director']] + item['cast']
+                for name in person_names:
+                    if name not in person_ids:
+                        statement = """INSERT INTO PERSON (NAME) VALUES (%s)
+                                    RETURNING id"""
+                        cursor.execute(statement, (name,))
+                        connection.commit()
+                        person_id = cursor.fetchone()[0]
+                        person_ids[name] = person_id
+
+    with dbapi2.connect(url) as connection:
+        with connection.cursor() as cursor:
+            for item in book_data:
+                if item['author'] not in person_ids:
                     statement = """INSERT INTO PERSON (NAME) VALUES (%s)
-                                   RETURNING id"""
-                    cursor.execute(statement, (name,))
+                                    RETURNING id"""
+                    cursor.execute(statement, (item['author'],))
                     connection.commit()
                     person_id = cursor.fetchone()[0]
-                    person_ids[name] = person_id
+                    person_ids[item['author']] = person_id
 
-with dbapi2.connect(url) as connection:
-    with connection.cursor() as cursor:
-        for item in book_data:
-            if item['author'] not in person_ids:
-                statement = """INSERT INTO PERSON (NAME) VALUES (%s)
-                                RETURNING id"""
-                cursor.execute(statement, (item['author'],))
-                connection.commit()
-                person_id = cursor.fetchone()[0]
-                person_ids[item['author']] = person_id    
-
-with dbapi2.connect(url) as connection:
-    with connection.cursor() as cursor:
-        for item in music_data:
-            if item['singer'] not in person_ids:
-                statement = """INSERT INTO PERSON (NAME) VALUES (%s)
-                                RETURNING id"""
-                cursor.execute(statement, (item['singer'],))
-                connection.commit()
-                person_id = cursor.fetchone()[0]
-                person_ids[item['singer']] = person_id     
-                    
-with dbapi2.connect(url) as connection:
-    with connection.cursor() as cursor:
-        for item in book_data:
-            genres_names = item['genres']
-            for genre in genres_names:
-                if genre not in genres_ids:
-                    statement = """INSERT INTO GENRES (NAME) VALUES (%s)
-                                   RETURNING id"""
-                    cursor.execute(statement, (genre,))
+    with dbapi2.connect(url) as connection:
+        with connection.cursor() as cursor:
+            for item in music_data:
+                if item['singer'] not in person_ids:
+                    statement = """INSERT INTO PERSON (NAME) VALUES (%s)
+                                    RETURNING id"""
+                    cursor.execute(statement, (item['singer'],))
                     connection.commit()
-                    genre_id = cursor.fetchone()[0]
-                    genres_ids[genre] = genre_id
+                    person_id = cursor.fetchone()[0]
+                    person_ids[item['singer']] = person_id
 
-
-
-with dbapi2.connect(url) as connection:
-    with connection.cursor() as cursor:
-        for item in movie_data:
-            statement = """
-                INSERT INTO MOVIE (TITLE, DESCRIPTION, YR, IMDBSCORE, SCORE, VOTES, DIRECTORID)
-                           VALUES (%(title)s, %(description)s, %(year)s, %(imdb_score)s, %(score)s, %(votes)s,
-                                   %(directorid)s)
-                RETURNING id
-            """
-            item['directorid'] = person_ids[item['director']]
-            cursor.execute(statement, item)
-            connection.commit()
-            movie_id = cursor.fetchone()[0]
-
-            for actor_ord, actor in enumerate(item['cast']):
-                statement = """INSERT INTO CASTING (MOVIEID, ACTORID, ORD)
-                                            VALUES (%s, %s, %s)"""
-                cursor.execute(statement, (movie_id, person_ids[actor],
-                                           actor_ord + 1))
-                connection.commit()
-                
-with dbapi2.connect(url) as connection:
-    with connection.cursor() as cursor:
-        for item in book_data:
-            statement = """
-                INSERT INTO BOOK (TITLE, DESCRIPTION, YR, PAGENUMBER, SCORE, VOTES, AUTHORID)
-                           VALUES (%(title)s, %(description)s, %(year)s, %(page_num)s, %(score)s, %(votes)s,
-                                   %(authorid)s)
-                RETURNING id
-            """
-            item['authorid'] = person_ids[item['author']]
-            cursor.execute(statement, item)
-            connection.commit()
-            book_id = cursor.fetchone()[0]
-
-            for genre in (item['genres']):
-                statement = """INSERT INTO BOOKGENRES (BOOKID, GENREID)
-                                            VALUES (%s, %s)"""
-                cursor.execute(statement, (book_id, genres_ids[genre]))
-                connection.commit()
-
-with dbapi2.connect(url) as connection:
-    with connection.cursor() as cursor:
-        for item in music_data:
-            statement = """
-                INSERT INTO BOOK (TITLE, ALBUM, YR, SCORE, VOTES, SINGERID)
-                           VALUES (%(title)s, %(album)s, %(year)s, %(score)s, %(votes)s,
-                                   %(singerid)s)
-            """
-            item['singerid'] = person_ids[item['singer']]
-            cursor.execute(statement, item)
-            connection.commit()
-
-def add_user(name, password):
     with dbapi2.connect(url) as connection:
-    with connection.cursor() as cursor:
-        statement = """
-            INSERT INTO USER (NAME, PASSWORD)
-                        VALUES (%s, %s)
-        """
-        cursor.execute(statement, name, password)
-        connection.commit()
+        with connection.cursor() as cursor:
+            for item in book_data:
+                genres_names = item['genres']
+                for genre in genres_names:
+                    if genre not in genres_ids:
+                        statement = """INSERT INTO GENRE (NAME) VALUES (%s)
+                                    RETURNING id"""
+                        cursor.execute(statement, (genre,))
+                        connection.commit()
+                        genre_id = cursor.fetchone()[0]
+                        genres_ids[genre] = genre_id
 
-add_user("ismailak", "12321")
-add_user("alperenyucal", "123456")
-add_user("azizalsancak", "1923")
-add_user("ezgiuzun", "00000")
-add_user("enginengin", "123456")
-
-def add_list(name, date,userid):
     with dbapi2.connect(url) as connection:
-    with connection.cursor() as cursor:
-        statement = """
-            INSERT INTO LIST (NAME, DATE, USERID)
-                        VALUES (%s, %s, %s)
-        """
-        cursor.execute(statement, name, date, userid)
-        connection.commit()
+        with connection.cursor() as cursor:
+            for item in movie_data:
+                statement = """
+                    INSERT INTO MOVIE (TITLE, DESCRIPTION, YR, IMDBSCORE, SCORE, VOTES, DIRECTORID)
+                            VALUES (%(title)s, %(description)s, %(year)s, %(imdb_score)s, %(score)s, %(votes)s,
+                                    %(directorid)s)
+                    RETURNING id
+                """
+                item['directorid'] = person_ids[item['director']]
+                cursor.execute(statement, item)
+                connection.commit()
+                movie_id = cursor.fetchone()[0]
 
-add_list("Begendiklerim",2019-10-27 12:51:54[.123], 1)
-add_list("Begendiklerim",2019-10-27 10:51:12[.123], 2)
-add_list("Begendiklerim",2019-10-27 11:21:28[.123], 3)
-add_list("Begendiklerim",2019-10-27 08:58:46[.123], 4)
-add_list("Begendiklerim",2019-10-27 00:21:25[.123], 5)
-add_list("Okuduklarım",2019-10-27 12:52:03[.123], 3)
-add_list("İzleyeceklerim",2019-10-27 12:00:59[.123], 1) 
-add_list("En İyi Rock",2019-10-27 22:22:54[.123], 2)        
+                for actor_ord, actor in enumerate(item['cast']):
+                    statement = """INSERT INTO CASTING (MOVIEID, ACTORID, ORD)
+                                                VALUES (%s, %s, %s)"""
+                    cursor.execute(statement, (movie_id, person_ids[actor],
+                                               actor_ord + 1))
+                    connection.commit()
 
-#def fiil_list():
+    with dbapi2.connect(url) as connection:
+        with connection.cursor() as cursor:
+            for item in book_data:
+                statement = """
+                    INSERT INTO BOOK (TITLE, DESCRIPTION, YR, PAGENUMBER, SCORE, VOTES, AUTHORID)
+                            VALUES (%(title)s, %(description)s, %(year)s, %(page_num)s, %(score)s, %(votes)s,
+                                    %(authorid)s)
+                    RETURNING id
+                """
+                item['authorid'] = person_ids[item['author']]
+                cursor.execute(statement, item)
+                connection.commit()
+                book_id = cursor.fetchone()[0]
+
+                for genre in (item['genres']):
+                    statement = """INSERT INTO BOOKGENRE (BOOKID, GENREID)
+                                                VALUES (%s, %s)"""
+                    cursor.execute(statement, (book_id, genres_ids[genre]))
+                    connection.commit()
+
+    with dbapi2.connect(url) as connection:
+        with connection.cursor() as cursor:
+            for item in music_data:
+                statement = """
+                    INSERT INTO MUSIC (TITLE, ALBUM, YR, SCORE, VOTES, SINGERID)
+                            VALUES (%(title)s, %(album)s, %(year)s, %(score)s, %(votes)s,
+                                    %(singerid)s)
+                """
+                item['singerid'] = person_ids[item['singer']]
+                cursor.execute(statement, item)
+                connection.commit()
+
+    createUser("ismailak", "12321")
+    createUser("alperenyucal", "123456")
+    createUser("azizalsancak", "1923")
+    createUser("ezgiuzun", "00000")
+    createUser("enginengin", "123456")
+
+
+
+
+
+    createList("Begendiklerim", "2019-10-27", 1)
+    createList("Begendiklerim", "2019-10-27", 2)
+    createList("Begendiklerim", "2019-10-27", 3)
+    createList("Begendiklerim", "2019-10-27", 4)
+    createList("Begendiklerim", "2019-10-27", 5)
+    createList("Okuduklarım", "2019-10-27", 3)
+    createList("İzleyeceklerim", "2019-10-27", 1)
+    createList("En İyi Rock", "2019-10-27", 2)
+
 
 
 if __name__ == "__main__":
-    url = os.getenv("DATABASE_URL")
+    url = db_url
     if url is None:
         print("Usage: DATABASE_URL=url python dbinit.py", file=sys.stderr)
         sys.exit(1)
