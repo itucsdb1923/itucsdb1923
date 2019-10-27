@@ -2,18 +2,15 @@ import React from "react";
 import { render } from "react-dom";
 import { BrowserRouter as Router, Route, Link } from "react-router-dom";
 import { Button } from "react-bootstrap";
+import MoviePage from "./pages/MoviePage";
+
 
 render((
   <Router>
     <div>
-      <Route exact path="/">Main Page</Route>
-      <Route path="/users">Users</Route>
-      <Route path="/contact">Contact</Route>
-      <Route path="/button">
-        <Button>
-          Button Example
-        </Button>
-      </Route>
+      <Switch>
+        <Route path="movie/:movie_id"><MoviePage /></Route>
+      </Switch>
     </div>
   </Router>
 ), document.getElementById('root'));
