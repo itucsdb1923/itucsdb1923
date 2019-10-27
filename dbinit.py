@@ -61,7 +61,6 @@ def initialize(url):
             ID SERIAL PRIMARY KEY,
             TITLE VARCHAR(80),
             DESCRIPTION VARCHAR,
-            PUBLISHER VARCHAR(80),
             YR NUMERIC(4),
             PAGENUMBER INTEGER,
             SCORE FLOAT DEFAULT 0.0,
@@ -369,19 +368,6 @@ with dbapi2.connect(url) as connection:
                     connection.commit()
                     person_id = cursor.fetchone()[0]
                     person_ids[name] = person_id
-                    
-with dbapi2.connect(url) as connection:
-    with connection.cursor() as cursor:
-        for item in book_data:
-            genres_names = item['genres']
-            for genre in genres_names:
-                if genre not in genres_ids:
-                    statement = """INSERT INTO GENRES (NAME) VALUES (%s)
-                                   RETURNING id"""
-                    cursor.execute(statement, (genre,))
-                    connection.commit()
-                    genre_id = cursor.fetchone()[0]
-                    genres_ids[genre] = genre_id
 
 with dbapi2.connect(url) as connection:
     with connection.cursor() as cursor:
@@ -404,6 +390,19 @@ with dbapi2.connect(url) as connection:
                 connection.commit()
                 person_id = cursor.fetchone()[0]
                 person_ids[item['singer']] = person_id     
+                    
+with dbapi2.connect(url) as connection:
+    with connection.cursor() as cursor:
+        for item in book_data:
+            genres_names = item['genres']
+            for genre in genres_names:
+                if genre not in genres_ids:
+                    statement = """INSERT INTO GENRES (NAME) VALUES (%s)
+                                   RETURNING id"""
+                    cursor.execute(statement, (genre,))
+                    connection.commit()
+                    genre_id = cursor.fetchone()[0]
+                    genres_ids[genre] = genre_id
 
 
 
@@ -411,8 +410,8 @@ with dbapi2.connect(url) as connection:
     with connection.cursor() as cursor:
         for item in movie_data:
             statement = """
-                INSERT INTO MOVIE (TITLE, YR, SCORE, VOTES, DIRECTORID)
-                           VALUES (%(title)s, %(year)s, %(score)s, %(votes)s,
+                INSERT INTO MOVIE (TITLE, DESCRIPTION, YR, IMDBSCORE, SCORE, VOTES, DIRECTORID)
+                           VALUES (%(title)s, %(description)s, %(year)s, %(imdb_score)s, %(score)s, %(votes)s,
                                    %(directorid)s)
                 RETURNING id
             """
@@ -427,6 +426,38 @@ with dbapi2.connect(url) as connection:
                 cursor.execute(statement, (movie_id, person_ids[actor],
                                            actor_ord + 1))
                 connection.commit()
+                
+with dbapi2.connect(url) as connection:
+    with connection.cursor() as cursor:
+        for item in book_data:
+            statement = """
+                INSERT INTO BOOK (TITLE, DESCRIPTION, YR, PAGENUMBER, SCORE, VOTES, AUTHORID)
+                           VALUES (%(title)s, %(description)s, %(year)s, %(page_num)s, %(score)s, %(votes)s,
+                                   %(authorid)s)
+                RETURNING id
+            """
+            item['authorid'] = person_ids[item['author']]
+            cursor.execute(statement, item)
+            connection.commit()
+            book_id = cursor.fetchone()[0]
+
+            for genre in (item['genres']):
+                statement = """INSERT INTO BOOKGENRES (BOOKID, GENREID)
+                                            VALUES (%s, %s)"""
+                cursor.execute(statement, (book_id, genres_ids[genre]))
+                connection.commit()
+
+with dbapi2.connect(url) as connection:
+    with connection.cursor() as cursor:
+        for item in music_data:
+            statement = """
+                INSERT INTO BOOK (TITLE, ALBUM, YR, SCORE, VOTES, SINGERID)
+                           VALUES (%(title)s, %(album)s, %(year)s, %(score)s, %(votes)s,
+                                   %(singerid)s)
+            """
+            item['singerid'] = person_ids[item['singer']]
+            cursor.execute(statement, item)
+            connection.commit()
 
 
 if __name__ == "__main__":
