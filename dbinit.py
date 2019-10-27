@@ -10,9 +10,6 @@ INIT_STATEMENTS = [
 ]
 
 
-url = """user='vagrant' password='vagrant'
-         host='localhost' port=5432 dbname='itucsdb1923'"""
-
 
 def initialize(url):
     with dbapi2.connect(url) as connection:
@@ -61,7 +58,6 @@ def initialize(url):
             ID SERIAL PRIMARY KEY,
             TITLE VARCHAR(80),
             DESCRIPTION VARCHAR,
-            PUBLISHER VARCHAR(80),
             YR NUMERIC(4),
             PAGENUMBER INTEGER,
             SCORE FLOAT DEFAULT 0.0,
@@ -87,8 +83,8 @@ def initialize(url):
     with dbapi2.connect(url) as connection:
         cursor = connection.cursor()
         statement = """CREATE TABLE USER (
-            ID SERIAL PRIMARY KEY,
-            NAME VARCHAR(80)
+            NAME VARCHAR(80) PRIMARY KEY,
+            PASSWORD VARCHAR(80)
         )"""
         cursor.execute(statement)
         cursor.close()  
@@ -178,6 +174,8 @@ movie_data = [
      'description': "In Gotham City, mentally-troubled comedian Arthur Fleck is disregarded and mistreated by society. He then embarks on a downward spiral of revolution and bloody crime. This path brings him face-to-face with his alter-ego.",
      'year': 2019,
      'imdb_score': 8.9,
+     'score': 9.0,
+     'votes': 1,
      'director': "Todd Phillips",
      'cast': ["Joaquin Phoenix", "Robert De Niro"]},
     {'title': "Inception",
@@ -259,6 +257,8 @@ book_data = [
      'description': "Snow is a postmodern novel by Turkish writer Orhan Pamuk. Published in Turkish in 2002, it was translated into English by Maureen Freely and published in 2004.",
      'year': 2002,
      'page_num': 426,
+     'score': 7.1,
+     'votes': 3,
      'author': "Orhan Pamuk",
      'genres': ["Novel"]},
     {'title': "The Death of Ivan Ilyich",
@@ -281,6 +281,8 @@ book_data = [
      'description': "Les Misérables is a French historical novel by Victor Hugo, first published in 1862, that is considered one of the greatest novels of the 19th century. In the English-speaking world, the novel is usually referred to by its original French title",
      'year': 1862,
      'page_num': 783,
+     'score': 7.5,
+     'votes': 2,
      'author': "Victor Hugo",
      'genres': ["Historical Fiction","Epic"]},
     {'title': "The Hobbit",
@@ -309,6 +311,8 @@ music_data = [
     {'title': "Billie Jean",
      'album': "Thriller 25",
      'year': 2008,
+     'score': 8.9,
+     'votes': 4,
      'singer': "Michael Jackson"},
     {'title': "Like A Rolling Stone",
      'album': "Highway 61 Revisited",
@@ -343,6 +347,8 @@ music_data = [
     {'title': "Halo",
      'album': "I Am... Sasha Fierce",
      'year': 2008,
+     'score': 6.7,
+     'votes': 4,
      'singer': "Beyonce"},
     {'title': "Derniere Danse",
      'album': "Mini World",
@@ -369,19 +375,6 @@ with dbapi2.connect(url) as connection:
                     connection.commit()
                     person_id = cursor.fetchone()[0]
                     person_ids[name] = person_id
-                    
-with dbapi2.connect(url) as connection:
-    with connection.cursor() as cursor:
-        for item in book_data:
-            genres_names = item['genres']
-            for genre in genres_names:
-                if genre not in genres_ids:
-                    statement = """INSERT INTO GENRES (NAME) VALUES (%s)
-                                   RETURNING id"""
-                    cursor.execute(statement, (genre,))
-                    connection.commit()
-                    genre_id = cursor.fetchone()[0]
-                    genres_ids[genre] = genre_id
 
 with dbapi2.connect(url) as connection:
     with connection.cursor() as cursor:
@@ -404,6 +397,19 @@ with dbapi2.connect(url) as connection:
                 connection.commit()
                 person_id = cursor.fetchone()[0]
                 person_ids[item['singer']] = person_id     
+                    
+with dbapi2.connect(url) as connection:
+    with connection.cursor() as cursor:
+        for item in book_data:
+            genres_names = item['genres']
+            for genre in genres_names:
+                if genre not in genres_ids:
+                    statement = """INSERT INTO GENRES (NAME) VALUES (%s)
+                                   RETURNING id"""
+                    cursor.execute(statement, (genre,))
+                    connection.commit()
+                    genre_id = cursor.fetchone()[0]
+                    genres_ids[genre] = genre_id
 
 
 
@@ -411,8 +417,8 @@ with dbapi2.connect(url) as connection:
     with connection.cursor() as cursor:
         for item in movie_data:
             statement = """
-                INSERT INTO MOVIE (TITLE, YR, SCORE, VOTES, DIRECTORID)
-                           VALUES (%(title)s, %(year)s, %(score)s, %(votes)s,
+                INSERT INTO MOVIE (TITLE, DESCRIPTION, YR, IMDBSCORE, SCORE, VOTES, DIRECTORID)
+                           VALUES (%(title)s, %(description)s, %(year)s, %(imdb_score)s, %(score)s, %(votes)s,
                                    %(directorid)s)
                 RETURNING id
             """
@@ -427,6 +433,75 @@ with dbapi2.connect(url) as connection:
                 cursor.execute(statement, (movie_id, person_ids[actor],
                                            actor_ord + 1))
                 connection.commit()
+                
+with dbapi2.connect(url) as connection:
+    with connection.cursor() as cursor:
+        for item in book_data:
+            statement = """
+                INSERT INTO BOOK (TITLE, DESCRIPTION, YR, PAGENUMBER, SCORE, VOTES, AUTHORID)
+                           VALUES (%(title)s, %(description)s, %(year)s, %(page_num)s, %(score)s, %(votes)s,
+                                   %(authorid)s)
+                RETURNING id
+            """
+            item['authorid'] = person_ids[item['author']]
+            cursor.execute(statement, item)
+            connection.commit()
+            book_id = cursor.fetchone()[0]
+
+            for genre in (item['genres']):
+                statement = """INSERT INTO BOOKGENRES (BOOKID, GENREID)
+                                            VALUES (%s, %s)"""
+                cursor.execute(statement, (book_id, genres_ids[genre]))
+                connection.commit()
+
+with dbapi2.connect(url) as connection:
+    with connection.cursor() as cursor:
+        for item in music_data:
+            statement = """
+                INSERT INTO BOOK (TITLE, ALBUM, YR, SCORE, VOTES, SINGERID)
+                           VALUES (%(title)s, %(album)s, %(year)s, %(score)s, %(votes)s,
+                                   %(singerid)s)
+            """
+            item['singerid'] = person_ids[item['singer']]
+            cursor.execute(statement, item)
+            connection.commit()
+
+def add_user(name, password):
+    with dbapi2.connect(url) as connection:
+    with connection.cursor() as cursor:
+        statement = """
+            INSERT INTO USER (NAME, PASSWORD)
+                        VALUES (%s, %s)
+        """
+        cursor.execute(statement, name, password)
+        connection.commit()
+
+add_user("ismailak", "12321")
+add_user("alperenyucal", "123456")
+add_user("azizalsancak", "1923")
+add_user("ezgiuzun", "00000")
+add_user("enginengin", "123456")
+
+def add_list(name, date,userid):
+    with dbapi2.connect(url) as connection:
+    with connection.cursor() as cursor:
+        statement = """
+            INSERT INTO LIST (NAME, DATE, USERID)
+                        VALUES (%s, %s, %s)
+        """
+        cursor.execute(statement, name, date, userid)
+        connection.commit()
+
+add_list("Begendiklerim",2019-10-27 12:51:54[.123], 1)
+add_list("Begendiklerim",2019-10-27 10:51:12[.123], 2)
+add_list("Begendiklerim",2019-10-27 11:21:28[.123], 3)
+add_list("Begendiklerim",2019-10-27 08:58:46[.123], 4)
+add_list("Begendiklerim",2019-10-27 00:21:25[.123], 5)
+add_list("Okuduklarım",2019-10-27 12:52:03[.123], 3)
+add_list("İzleyeceklerim",2019-10-27 12:00:59[.123], 1) 
+add_list("En İyi Rock",2019-10-27 22:22:54[.123], 2)        
+
+#def fiil_list():
 
 
 if __name__ == "__main__":

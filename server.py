@@ -1,3 +1,4 @@
+
 import sys
 from flask import Flask, render_template, jsonify
 
@@ -13,7 +14,7 @@ def api():
 @app.route("/<route>")
 def home_page(route):
     return render_template("main.html")
-
+    
 
 if __name__ == "__main__":
     app.run(debug=len(sys.argv) == 2 and sys.argv[1] == "--debug")
