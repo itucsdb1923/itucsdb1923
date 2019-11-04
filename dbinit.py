@@ -418,13 +418,13 @@ def initialize(url):
 
 
     createList("Begendiklerim", "2019-10-27", 1)
-    createList("Begendiklerim", "2019-10-27", 2)
-    createList("Begendiklerim", "2019-10-27", 3)
-    createList("Begendiklerim", "2019-10-27", 4)
-    createList("Begendiklerim", "2019-10-27", 5)
-    createList("Okuduklarım", "2019-10-27", 3)
-    createList("İzleyeceklerim", "2019-10-27", 1)
-    createList("En İyi Rock", "2019-10-27", 2)
+    createList("Begendiklerim", "2019-10-28", 2)
+    createList("Begendiklerim", "2019-10-25", 3)
+    createList("Begendiklerim", "2019-10-07", 4)
+    createList("Begendiklerim", "2019-09-28", 5)
+    createList("Okuduklarım", "2019-09-27", 3)
+    createList("İzleyeceklerim", "2019-10-29", 1)
+    createList("En İyi Rock", "2019-09-20", 2)
 
 
 

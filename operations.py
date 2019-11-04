@@ -2,12 +2,20 @@ import psycopg2 as dbapi2
 from db import db_url as url
 
 
-def createUser(name, password):
+def checkLogin(name, password):
+    with dbapi2.connect(url) as connection:
+        with connection.cursor() as cursor:
+            statement = """SELECT PASSWORD FROM USERS WHERE NAME = %s"""
+            cursor.execute(statement, (name,))
+            p = cursor.fetchone()[0]
+            connection.commit()
+            return False if p == password else True 
+
+def createUser(name, password):   
     with dbapi2.connect(url) as connection:
         with connection.cursor() as cursor:
             statement = """INSERT INTO USERS (NAME, PASSWORD) VALUES (%s, %s)"""
             cursor.execute(statement, (name, password))
-            connection.commit()
 
 def createList(name, date, userid):
     with dbapi2.connect(url) as connection:
@@ -138,7 +146,7 @@ def getLists():
     lists = []
     with dbapi2.connect(url) as connection:
         with connection.cursor() as cursor:
-            statement = """SELECT ID, NAME, DATE, USERID FROM LIST"""
+            statement = """SELECT ID, NAME, DATE, USERID FROM LIST ORDER BY DATE DESC"""
             cursor.execute(statement)
             a = cursor.fetchall()
             for item_id, name, date, user_id in a:
