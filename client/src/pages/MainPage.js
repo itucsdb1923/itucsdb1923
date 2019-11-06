@@ -11,7 +11,7 @@ const MainPage = () => {
   useEffect(() => {
     let isCancelled = false;
     
-    fetch("http://127.0.0.1:5000/api")
+    fetch("/api")
       .then(res => res.json())
       .then(data => {
         if (!isCancelled) 
