@@ -1,15 +1,7 @@
 import React from "react";
 
-class MoviePage extends React.Component {
-    constructor(props) {
-        super(props);
-        this.state = {};
-    }
-
-    render() {
-        let { movie_id } = useParams();
-        return <div>{movie_id}</div>
-    }
+const MoviePage = (props) => {
+    return <div>{props.match.params.movie_id}</div>
 }
 
 export default MoviePage;

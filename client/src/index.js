@@ -1,17 +1,16 @@
 import React from "react";
 import { render } from "react-dom";
-import { BrowserRouter as Router, Route, Link } from "react-router-dom";
-import { Button } from "react-bootstrap";
-import MoviePage from "./pages/MoviePage";
+import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
 
+import LoginPage from "./pages/LoginPage";
+import MainPage from "./pages/MainPage";
 
 render((
   <Router>
-    <div>
-      <Switch>
-        <Route path="movie/:movie_id"><MoviePage /></Route>
-      </Switch>
-    </div>
+    <Switch>
+      <Route exact path="/" component={MainPage} />
+      <Route exact path="/login" component={LoginPage} />
+      <Route exact path="*">404</Route>
+    </Switch>
   </Router>
 ), document.getElementById('root'));
-

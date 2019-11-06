@@ -1,7 +1,7 @@
 import os
 import sys
 
-from db import db_url
+from settings import DB_URL as db_url
 import psycopg2 as dbapi2
 from operations import createUser, createList
 
