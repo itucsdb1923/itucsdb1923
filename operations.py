@@ -14,6 +14,7 @@ def checkLogin(name, password):
             except:
                 return False
 
+
 def createUser(name, password):
     with dbapi2.connect(url) as connection:
         with connection.cursor() as cursor:
