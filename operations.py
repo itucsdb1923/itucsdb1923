@@ -2,24 +2,25 @@ import psycopg2 as dbapi2
 from settings import DB_URL as url
 
 
-def checkLogin(name, password):
+# Check if the original password matches with the given one
+def checkLogin(username, password):
     with dbapi2.connect(url) as connection:
         with connection.cursor() as cursor:
             try:
                 statement = """SELECT PASSWORD FROM USERS WHERE NAME = %s"""
-                cursor.execute(statement, (name,))
-                p = cursor.fetchone()[0]
+                cursor.execute(statement, (username,))
+                pw = cursor.fetchone()[0]
                 connection.commit()
-                return True if p == password else False
+                return True if pw == password else False
             except:
                 return False
 
 
-def createUser(name, password):
+def createUser(username, password):
     with dbapi2.connect(url) as connection:
         with connection.cursor() as cursor:
             statement = """INSERT INTO USERS (NAME, PASSWORD) VALUES (%s, %s)"""
-            cursor.execute(statement, (name, password))
+            cursor.execute(statement, (username, password))
 
 
 def createList(name, date, userid):
@@ -30,6 +31,43 @@ def createList(name, date, userid):
             connection.commit()
 
 
+# add a list item with given type to a list.
+# type should be one of these: "BOOK", "MUSIC", "MOVIE"
+def addListItem(type, itemId, listId):
+    with dbapi2.connect(url) as connection:
+        with connection.cursor() as cursor:
+            statement = """INSERT INTO {}LIST ({}ID, LISTID) VALUES (%s, %s)""".format(
+                type, type)
+            cursor.execute(statement, (itemId, listId))
+            connection.commit()
+
+
+def getList(listId):
+    response = {"list_id": listId, "items": []}
+    with dbapi2.connect(url) as connection:
+        with connection.cursor() as cursor:
+            statement = """select 'bk-' || cast(bkl.bookid as varchar(10)) as itemid, bk.title, bk.score
+                            from booklist bkl inner join book bk on bkl.bookid = bk.id where listid = %s 
+                            union all
+                            select 'ms-' || cast(msl.musicid as varchar(10)) as itemid, ms.title, ms.score
+                            from musiclist msl inner join music ms on msl.musicid = ms.id where listid = %s 
+                            union all
+                            select 'mv-' || cast(mvl.movieid as varchar(10)) as itemid, mv.title, mv.score
+                            from movielist mvl inner join movie mv on mvl.movieid = mv.id where listid = %s"""
+
+            cursor.execute(statement, (listId, listId, listId))
+            data = cursor.fetchall()
+
+            for item_id, title, score in data:
+                response["items"].append({
+                    "item_id": item_id,
+                    "title": title,
+                    "score": score,
+                })
+
+    return response
+
+
 def getMovies():
     movies = []
     with dbapi2.connect(url) as connection:
@@ -38,20 +76,19 @@ def getMovies():
             cursor.execute(statement)
             a = cursor.fetchall()
             for item_id, title, description, year, imdb_score, score, votes, director_id in a:
-                x = {"item_id": item_id, "title": title, "description": description,
-                     "year": year, "imdb_score": imdb_score, "score": score, "votes": votes}
+                movie = {"item_id": item_id, "title": title, "description": description,
+                         "year": year, "imdb_score": imdb_score, "score": score, "votes": votes}
                 statement = """SELECT NAME FROM PERSON WHERE (ID = %s)"""
                 cursor.execute(statement, (director_id,))
-                x["director"] = cursor.fetchone()[0]
+                movie["director"] = cursor.fetchone()[0]
                 statement = """SELECT NAME FROM PERSON JOIN CASTING ON (CASTING.ACTORID = PERSON.ID) WHERE (MOVIEID = %s)"""
                 cursor.execute(statement, (item_id,))
                 cast = cursor.fetchall()
                 a = []
                 for c in cast:
                     a.append(c[0])
-                x["cast"] = a
-                movies.append(x.copy())
-                print('  {}'.format(movies))
+                movie["cast"] = a
+                movies.append(movie.copy())
     return movies
 
 
@@ -63,20 +100,19 @@ def getBooks():
             cursor.execute(statement)
             a = cursor.fetchall()
             for item_id, title, description, year, page_num, score, votes, author_id in a:
-                x = {"item_id": item_id, "title": title, "description": description,
-                     "year": year, "page_num": page_num, "score": score, "votes": votes}
+                book = {"item_id": item_id, "title": title, "description": description,
+                        "year": year, "page_num": page_num, "score": score, "votes": votes}
                 statement = """SELECT NAME FROM PERSON WHERE (ID = %s)"""
                 cursor.execute(statement, (author_id,))
-                x["author"] = cursor.fetchone()[0]
+                book["author"] = cursor.fetchone()[0]
                 statement = """SELECT NAME FROM GENRE JOIN BOOKGENRE ON (BOOKGENRE.GENREID = GENRE.ID) WHERE (bOOKID = %s)"""
                 cursor.execute(statement, (item_id,))
                 cast = cursor.fetchall()
                 a = []
                 for c in cast:
                     a.append(c[0])
-                x["genre"] = a
-                books.append(x.copy())
-                print('  {}'.format(books))
+                book["genre"] = a
+                books.append(book.copy())
     return books
 
 
@@ -88,13 +124,12 @@ def getMusics():
             cursor.execute(statement)
             a = cursor.fetchall()
             for item_id, title, album, year, score, votes, singer_id in a:
-                x = {"item_id": item_id, "title": title, "album": album,
-                     "year": year, "score": score, "votes": votes}
+                music = {"item_id": item_id, "title": title, "album": album,
+                         "year": year, "score": score, "votes": votes}
                 statement = """SELECT NAME FROM PERSON WHERE (ID = %s)"""
                 cursor.execute(statement, (singer_id,))
-                x["singer"] = cursor.fetchone()[0]
-                musics.append(x.copy())
-                print('  {}'.format(musics))
+                music["singer"] = cursor.fetchone()[0]
+                musics.append(music.copy())
     return musics
 
 
@@ -106,20 +141,19 @@ def getMovie(movie_id):
             a = cursor.fetchall()
             (item_id, title, description, year,
              imdb_score, score, votes, director_id) = a[0]
-            x = {"item_id": item_id, "title": title, "description": description,
-                 "year": year, "imdb_score": imdb_score, "score": score, "votes": votes}
+            movie = {"item_id": item_id, "title": title, "description": description,
+                     "year": year, "imdb_score": imdb_score, "score": score, "votes": votes}
             statement = """SELECT NAME FROM PERSON WHERE (ID = %s)"""
             cursor.execute(statement, (director_id,))
-            x["director"] = cursor.fetchone()[0]
+            movie["director"] = cursor.fetchone()[0]
             statement = """SELECT NAME FROM PERSON JOIN CASTING ON (CASTING.ACTORID = PERSON.ID) WHERE (MOVIEID = %s)"""
             cursor.execute(statement, (item_id,))
             cast = cursor.fetchall()
             a = []
             for c in cast:
                 a.append(c[0])
-            x["cast"] = a
-            print('  {}'.format(x))
-    return x
+            movie["cast"] = a
+    return movie
 
 
 def getBook(book_id):
@@ -130,20 +164,19 @@ def getBook(book_id):
             a = cursor.fetchall()
             (item_id, title, description, year,
              page_num, score, votes, author_id) = a[0]
-            x = {"item_id": item_id, "title": title, "description": description,
-                 "year": year, "page_num": page_num, "score": score, "votes": votes}
+            book = {"item_id": item_id, "title": title, "description": description,
+                    "year": year, "page_num": page_num, "score": score, "votes": votes}
             statement = """SELECT NAME FROM PERSON WHERE (ID = %s)"""
             cursor.execute(statement, (author_id,))
-            x["author"] = cursor.fetchone()[0]
+            book["author"] = cursor.fetchone()[0]
             statement = """SELECT NAME FROM GENRE JOIN BOOKGENRE ON (BOOKGENRE.GENREID = GENRE.ID) WHERE (bOOKID = %s)"""
             cursor.execute(statement, (item_id,))
             cast = cursor.fetchall()
             a = []
             for c in cast:
                 a.append(c[0])
-            x["genre"] = a
-            print('  {}'.format(x))
-    return x
+            book["genre"] = a
+    return book
 
 
 def getMusic(music_id):
@@ -153,13 +186,12 @@ def getMusic(music_id):
             cursor.execute(statement, (music_id,))
             a = cursor.fetchall()
             (item_id, title, album, year, score, votes, singer_id) = a[0]
-            x = {"item_id": item_id, "title": title, "album": album,
-                 "year": year, "score": score, "votes": votes}
+            music = {"item_id": item_id, "title": title, "album": album,
+                     "year": year, "score": score, "votes": votes}
             statement = """SELECT NAME FROM PERSON WHERE (ID = %s)"""
             cursor.execute(statement, (singer_id,))
-            x["singer"] = cursor.fetchone()[0]
-            print('  {}'.format(x))
-    return x
+            music["singer"] = cursor.fetchone()[0]
+    return music
 
 
 def getLists():
@@ -170,10 +202,9 @@ def getLists():
             cursor.execute(statement)
             a = cursor.fetchall()
             for item_id, name, date, user_id in a:
-                x = {"item_id": item_id, "name": name, "date": date}
+                list = {"item_id": item_id, "name": name, "date": date}
                 statement = """SELECT NAME FROM USERS WHERE (ID = %s)"""
                 cursor.execute(statement, (user_id,))
-                x["user"] = cursor.fetchone()[0]
-                lists.append(x.copy())
-                print('  {}'.format(lists))
+                list["user"] = cursor.fetchone()[0]
+                lists.append(list.copy())
     return lists

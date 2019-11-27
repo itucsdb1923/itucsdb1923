@@ -3,7 +3,7 @@ import sys
 
 from settings import DB_URL as db_url
 import psycopg2 as dbapi2
-from operations import createUser, createList
+from operations import createUser, createList, addListItem
 
 movie_data = [
     {'title': "The Godfather",
@@ -286,6 +286,15 @@ INIT_STATEMENTS = [
             NAME VARCHAR(80),
             DATE DATE,
             USERID INTEGER REFERENCES USERS (ID))""",
+    """CREATE TABLE MOVIELIST (
+        MOVIEID INTEGER REFERENCES MOVIE (ID),
+        LISTID INTEGER REFERENCES LIST (ID))""",
+    """CREATE TABLE BOOKLIST (
+        BOOKID INTEGER REFERENCES BOOK (ID),
+        LISTID INTEGER REFERENCES LIST (ID))""",
+    """CREATE TABLE MUSICLIST (
+        MUSICID INTEGER REFERENCES MUSIC (ID),
+        LISTID INTEGER REFERENCES LIST (ID))""",
     """CREATE TABLE GENRE (
             ID SERIAL PRIMARY KEY,
             NAME VARCHAR(80))""",
@@ -302,120 +311,103 @@ def initialize(url):
         cursor = connection.cursor()
         for statement in INIT_STATEMENTS:
             cursor.execute(statement)
+
+        person_ids = {}
+        genres_ids = {}
+        for item in movie_data:
+            person_names = [item['director']] + item['cast']
+            for name in person_names:
+                if name not in person_ids:
+                    statement = """INSERT INTO PERSON (NAME) VALUES (%s)
+                                RETURNING id"""
+                    cursor.execute(statement, (name,))
+                    connection.commit()
+                    person_id = cursor.fetchone()[0]
+                    person_ids[name] = person_id
+
+        for item in book_data:
+            if item['author'] not in person_ids:
+                statement = """INSERT INTO PERSON (NAME) VALUES (%s)
+                                RETURNING id"""
+                cursor.execute(statement, (item['author'],))
+                connection.commit()
+                person_id = cursor.fetchone()[0]
+                person_ids[item['author']] = person_id
+
+        for item in music_data:
+            if item['singer'] not in person_ids:
+                statement = """INSERT INTO PERSON (NAME) VALUES (%s)
+                                RETURNING id"""
+                cursor.execute(statement, (item['singer'],))
+                connection.commit()
+                person_id = cursor.fetchone()[0]
+                person_ids[item['singer']] = person_id
+
+        for item in book_data:
+            genres_names = item['genres']
+            for genre in genres_names:
+                if genre not in genres_ids:
+                    statement = """INSERT INTO GENRE (NAME) VALUES (%s)
+                                RETURNING id"""
+                    cursor.execute(statement, (genre,))
+                    connection.commit()
+                    genre_id = cursor.fetchone()[0]
+                    genres_ids[genre] = genre_id
+
+        for item in movie_data:
+            statement = """
+                INSERT INTO MOVIE (TITLE, DESCRIPTION, YR, IMDBSCORE, SCORE, VOTES, DIRECTORID)
+                        VALUES (%(title)s, %(description)s, %(year)s, %(imdb_score)s, %(score)s, %(votes)s,
+                                %(directorid)s)
+                RETURNING id
+            """
+            item['directorid'] = person_ids[item['director']]
+            cursor.execute(statement, item)
+            connection.commit()
+            movie_id = cursor.fetchone()[0]
+
+            for actor_ord, actor in enumerate(item['cast']):
+                statement = """INSERT INTO CASTING (MOVIEID, ACTORID, ORD)
+                                            VALUES (%s, %s, %s)"""
+                cursor.execute(statement, (movie_id, person_ids[actor],
+                                           actor_ord + 1))
+                connection.commit()
+
+        for item in book_data:
+            statement = """
+                INSERT INTO BOOK (TITLE, DESCRIPTION, YR, PAGENUMBER, SCORE, VOTES, AUTHORID)
+                        VALUES (%(title)s, %(description)s, %(year)s, %(page_num)s, %(score)s, %(votes)s,
+                                %(authorid)s)
+                RETURNING id
+            """
+            item['authorid'] = person_ids[item['author']]
+            cursor.execute(statement, item)
+            connection.commit()
+            book_id = cursor.fetchone()[0]
+
+            for genre in (item['genres']):
+                statement = """INSERT INTO BOOKGENRE (BOOKID, GENREID)
+                                            VALUES (%s, %s)"""
+                cursor.execute(statement, (book_id, genres_ids[genre]))
+                connection.commit()
+
+        for item in music_data:
+            statement = """
+                INSERT INTO MUSIC (TITLE, ALBUM, YR, SCORE, VOTES, SINGERID)
+                        VALUES (%(title)s, %(album)s, %(year)s, %(score)s, %(votes)s,
+                                %(singerid)s)
+            """
+            item['singerid'] = person_ids[item['singer']]
+            cursor.execute(statement, item)
+            connection.commit()
+
         cursor.close()
-
-    person_ids = {}
-    genres_ids = {}
-    with dbapi2.connect(url) as connection:
-        with connection.cursor() as cursor:
-            for item in movie_data:
-                person_names = [item['director']] + item['cast']
-                for name in person_names:
-                    if name not in person_ids:
-                        statement = """INSERT INTO PERSON (NAME) VALUES (%s)
-                                    RETURNING id"""
-                        cursor.execute(statement, (name,))
-                        connection.commit()
-                        person_id = cursor.fetchone()[0]
-                        person_ids[name] = person_id
-
-    with dbapi2.connect(url) as connection:
-        with connection.cursor() as cursor:
-            for item in book_data:
-                if item['author'] not in person_ids:
-                    statement = """INSERT INTO PERSON (NAME) VALUES (%s)
-                                    RETURNING id"""
-                    cursor.execute(statement, (item['author'],))
-                    connection.commit()
-                    person_id = cursor.fetchone()[0]
-                    person_ids[item['author']] = person_id
-
-    with dbapi2.connect(url) as connection:
-        with connection.cursor() as cursor:
-            for item in music_data:
-                if item['singer'] not in person_ids:
-                    statement = """INSERT INTO PERSON (NAME) VALUES (%s)
-                                    RETURNING id"""
-                    cursor.execute(statement, (item['singer'],))
-                    connection.commit()
-                    person_id = cursor.fetchone()[0]
-                    person_ids[item['singer']] = person_id
-
-    with dbapi2.connect(url) as connection:
-        with connection.cursor() as cursor:
-            for item in book_data:
-                genres_names = item['genres']
-                for genre in genres_names:
-                    if genre not in genres_ids:
-                        statement = """INSERT INTO GENRE (NAME) VALUES (%s)
-                                    RETURNING id"""
-                        cursor.execute(statement, (genre,))
-                        connection.commit()
-                        genre_id = cursor.fetchone()[0]
-                        genres_ids[genre] = genre_id
-
-    with dbapi2.connect(url) as connection:
-        with connection.cursor() as cursor:
-            for item in movie_data:
-                statement = """
-                    INSERT INTO MOVIE (TITLE, DESCRIPTION, YR, IMDBSCORE, SCORE, VOTES, DIRECTORID)
-                            VALUES (%(title)s, %(description)s, %(year)s, %(imdb_score)s, %(score)s, %(votes)s,
-                                    %(directorid)s)
-                    RETURNING id
-                """
-                item['directorid'] = person_ids[item['director']]
-                cursor.execute(statement, item)
-                connection.commit()
-                movie_id = cursor.fetchone()[0]
-
-                for actor_ord, actor in enumerate(item['cast']):
-                    statement = """INSERT INTO CASTING (MOVIEID, ACTORID, ORD)
-                                                VALUES (%s, %s, %s)"""
-                    cursor.execute(statement, (movie_id, person_ids[actor],
-                                               actor_ord + 1))
-                    connection.commit()
-
-    with dbapi2.connect(url) as connection:
-        with connection.cursor() as cursor:
-            for item in book_data:
-                statement = """
-                    INSERT INTO BOOK (TITLE, DESCRIPTION, YR, PAGENUMBER, SCORE, VOTES, AUTHORID)
-                            VALUES (%(title)s, %(description)s, %(year)s, %(page_num)s, %(score)s, %(votes)s,
-                                    %(authorid)s)
-                    RETURNING id
-                """
-                item['authorid'] = person_ids[item['author']]
-                cursor.execute(statement, item)
-                connection.commit()
-                book_id = cursor.fetchone()[0]
-
-                for genre in (item['genres']):
-                    statement = """INSERT INTO BOOKGENRE (BOOKID, GENREID)
-                                                VALUES (%s, %s)"""
-                    cursor.execute(statement, (book_id, genres_ids[genre]))
-                    connection.commit()
-
-    with dbapi2.connect(url) as connection:
-        with connection.cursor() as cursor:
-            for item in music_data:
-                statement = """
-                    INSERT INTO MUSIC (TITLE, ALBUM, YR, SCORE, VOTES, SINGERID)
-                            VALUES (%(title)s, %(album)s, %(year)s, %(score)s, %(votes)s,
-                                    %(singerid)s)
-                """
-                item['singerid'] = person_ids[item['singer']]
-                cursor.execute(statement, item)
-                connection.commit()
 
     createUser("ismailak", "12321")
     createUser("alperenyucal", "123456")
     createUser("azizalsancak", "1923")
     createUser("ezgiuzun", "00000")
     createUser("enginengin", "123456")
-
-
-
-
 
     createList("Begendiklerim", "2019-10-27", 1)
     createList("Begendiklerim", "2019-10-28", 2)
@@ -426,6 +418,13 @@ def initialize(url):
     createList("İzleyeceklerim", "2019-10-29", 1)
     createList("En İyi Rock", "2019-09-20", 2)
 
+    addListItem("BOOK", 3, 1)
+    addListItem("BOOK", 1, 1)
+    addListItem("BOOK", 2, 1)
+    addListItem("MOVIE", 2, 1)
+    addListItem("MOVIE", 4, 1)
+    addListItem("MUSIC", 1, 1)
+    addListItem("MUSIC", 5, 1)
 
 
 if __name__ == "__main__":

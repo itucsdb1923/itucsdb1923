@@ -1,5 +1,4 @@
-from operations import (createUser, createList, getMovies, getBooks,
-                        getMusics, getMovie, getBook, getMusic, getLists, checkLogin)
+from operations import *
 from flask import jsonify, Blueprint, request
 from flask_jwt_extended import (
     create_access_token, JWTManager, jwt_required, get_jwt_identity)
@@ -41,6 +40,11 @@ def book(book_id):
 @api.route("/music/<music_id>")
 def music(music_id):
     return jsonify(getMusic(music_id))
+
+
+@api.route("/list/<list_id>")
+def list(list_id):
+    return jsonify(getList(list_id))
 
 
 @api.route("/login", methods=["POST"])
