@@ -86,7 +86,7 @@ def getUserLists(username):
             for id, name, date, username in data:
                 list = {"list_id": id, "name": name,
                         "date": date, "user": username,
-                        "items": getListItems(id, limit=5)
+                        "items": getListItems(id, limit=4)
                         }
                 lists.append(list.copy())
 
@@ -230,7 +230,7 @@ def getLists():
 
                 list = {"list_id": id, "name": name,
                         "date": date, "user": username,
-                        "items": getListItems(id, limit=5)
+                        "items": getListItems(id, limit=4)
                         }
 
                 lists.append(list.copy())

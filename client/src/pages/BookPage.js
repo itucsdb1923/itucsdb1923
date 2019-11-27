@@ -2,18 +2,17 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import MainTemplate from "./MainTemplate";
 import { Accordion, Card, Container, ProgressBar, Button } from 'react-bootstrap';
-import ListButton from "../components/ListButton";
 
-const MoviePage = (props) => {
+const BookPage = (props) => {
 
   const [state, setState] = useState({
-    data: [],
+    data: []
   });
 
   useEffect(() => {
     let isCancelled = false;
 
-    fetch("/api/movies")
+    fetch("/api/books")
       .then(res => res.json())
       .then(data => {
         if (!isCancelled)
@@ -32,24 +31,24 @@ const MoviePage = (props) => {
         </Accordion.Toggle>
         <Accordion.Collapse eventKey={item.item_id}>
           <Card.Body>
-            <Card.Title>{item.director}</Card.Title>
-            <Card.Text>
-              {"CAST : " + item.cast}
-              <br />
-              {"DESCRIPTION : " + item.description}
-              <br />
-            </Card.Text>
-            <div align="middle">
-              <div style={{ width: "50%" }}>
-                {"Listist Score"}
-                <ProgressBar now={item.score * 10} label={`${item.score + " (" + item.votes + ")"}`} />
-                {"Imdb Score"}
-                <ProgressBar variant="warning" now={item.imdb_score * 10} label={`${item.imdb_score}`} />
-              </div></div>
+            <Card.Title>{item.author}</Card.Title>
+          <Card.Text>
+            {"CAST : " + item.genre}
             <br />
-            <div align="middle">
-              <Button variant="primary">ADD</Button>
-            </div>
+            {"PAGE : " + item.page_num}
+            <br />
+            {"DESCRIPTION : " + item.description}
+            <br />
+          </Card.Text>
+          <div align="middle">
+          <div style={{width : "50%"}}>
+          {"Listist Score"}
+          <ProgressBar now={item.score * 10} label={`${item.score + " (" + item.votes + ")"}`} />
+          </div></div>
+          <br />
+          <div align="middle">
+          <Button variant="primary">ADD</Button>
+          </div>
           </Card.Body>
         </Accordion.Collapse>
       </Card>)
@@ -63,15 +62,11 @@ const MoviePage = (props) => {
           {items}
         </Accordion>
       </Container>
-      <ListButton item={{
-        itemId: 1,
-        type: "BOOK"
-      }} />
     </MainTemplate>
   )
 }
 
-export default MoviePage;
+export default BookPage;
 
 
 
