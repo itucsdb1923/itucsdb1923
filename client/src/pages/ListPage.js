@@ -3,16 +3,18 @@ import { Link } from "react-router-dom";
 import MainTemplate from "./MainTemplate";
 import { Accordion, Card, Container, ProgressBar, Button } from 'react-bootstrap';
 
-const MoviePage = (props) => {
+const ListPage = (props) => {
 
   const [state, setState] = useState({
     data: []
   });
 
+  console.log()
+
   useEffect(() => {
     let isCancelled = false;
 
-    fetch("/api/movies")
+    fetch("/api/list/"+props.match.params.list_id)
       .then(res => res.json())
       .then(data => {
         if (!isCancelled)
@@ -25,25 +27,17 @@ const MoviePage = (props) => {
 
   const items = state.data.map((item) => {
     return (
-      <Card key={item.item_id}>
-        <Accordion.Toggle as={Card.Header} eventKey={item.item_id} align="middle">
-          {item.title + " (" + item.year + ")"}
+      <Card key={item.item_type + item.item_id}>
+        <Accordion.Toggle as={Card.Header} eventKey={item.item_type + item.item_id} align="middle">
+          {item.title}
         </Accordion.Toggle>
-        <Accordion.Collapse eventKey={item.item_id}>
+        <Accordion.Collapse eventKey={item.item_type + item.item_id}>
           <Card.Body>
-            <Card.Title>{item.director}</Card.Title>
-          <Card.Text>
-            {"CAST : " + item.cast}
-            <br />
-            {"DESCRIPTION : " + item.description}
-            <br />
-          </Card.Text>
+            <Card.Title align = 'middle'>{item.item_type}</Card.Title>
           <div align="middle">
           <div style={{width : "50%"}}>
           {"Listist Score"}
-          <ProgressBar now={item.score * 10} label={`${item.score + " (" + item.votes + ")"}`} />
-          {"Imdb Score"}
-          <ProgressBar variant="warning"  now={item.imdb_score * 10} label={`${item.imdb_score}`} />
+          <ProgressBar now={item.score * 10}/>
           </div></div>
           <br />
           <div align="middle">
@@ -66,7 +60,7 @@ const MoviePage = (props) => {
   )
 }
 
-export default MoviePage;
+export default ListPage;
 
 
 

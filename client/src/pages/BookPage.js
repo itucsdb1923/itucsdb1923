@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import MainTemplate from "./MainTemplate";
 import { Accordion, Card, Container, ProgressBar, Button } from 'react-bootstrap';
 
-const MoviePage = (props) => {
+const BookPage = (props) => {
 
   const [state, setState] = useState({
     data: []
@@ -12,7 +12,7 @@ const MoviePage = (props) => {
   useEffect(() => {
     let isCancelled = false;
 
-    fetch("/api/movies")
+    fetch("/api/books")
       .then(res => res.json())
       .then(data => {
         if (!isCancelled)
@@ -31,9 +31,11 @@ const MoviePage = (props) => {
         </Accordion.Toggle>
         <Accordion.Collapse eventKey={item.item_id}>
           <Card.Body>
-            <Card.Title>{item.director}</Card.Title>
+            <Card.Title>{item.author}</Card.Title>
           <Card.Text>
-            {"CAST : " + item.cast}
+            {"CAST : " + item.genre}
+            <br />
+            {"PAGE : " + item.page_num}
             <br />
             {"DESCRIPTION : " + item.description}
             <br />
@@ -42,8 +44,6 @@ const MoviePage = (props) => {
           <div style={{width : "50%"}}>
           {"Listist Score"}
           <ProgressBar now={item.score * 10} label={`${item.score + " (" + item.votes + ")"}`} />
-          {"Imdb Score"}
-          <ProgressBar variant="warning"  now={item.imdb_score * 10} label={`${item.imdb_score}`} />
           </div></div>
           <br />
           <div align="middle">
@@ -66,7 +66,7 @@ const MoviePage = (props) => {
   )
 }
 
-export default MoviePage;
+export default BookPage;
 
 
 
