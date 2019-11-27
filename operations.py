@@ -42,30 +42,37 @@ def addListItem(type, itemId, listId):
             connection.commit()
 
 
-def getList(listId):
-    response = {"list_id": listId, "items": []}
+def getListItems(listId, limit=-1, offset=-1):
+    items = []
     with dbapi2.connect(url) as connection:
         with connection.cursor() as cursor:
-            statement = """select 'bk-' || cast(bkl.bookid as varchar(10)) as itemid, bk.title, bk.score
+            statement = """select bkl.listid, 'book' as itemtype, bk.id as itemid, bk.title, bk.score
                             from booklist bkl inner join book bk on bkl.bookid = bk.id where listid = %s 
                             union all
-                            select 'ms-' || cast(msl.musicid as varchar(10)) as itemid, ms.title, ms.score
+                            select msl.listid, 'music' as itemtype, ms.id as itemid, ms.title, ms.score
                             from musiclist msl inner join music ms on msl.musicid = ms.id where listid = %s 
                             union all
-                            select 'mv-' || cast(mvl.movieid as varchar(10)) as itemid, mv.title, mv.score
-                            from movielist mvl inner join movie mv on mvl.movieid = mv.id where listid = %s"""
+                            select mvl.listid, 'movie' as itemtype, mv.id as itemid, mv.title, mv.score
+                            from movielist mvl inner join movie mv on mvl.movieid = mv.id where listid = %s
+                            """
+
+            if limit > 0:
+                statement += "limit " + str(limit)
+            if offset > 0:
+                statement += " offset " + str(offset)
 
             cursor.execute(statement, (listId, listId, listId))
             data = cursor.fetchall()
 
-            for item_id, title, score in data:
-                response["items"].append({
+            for list_id, item_type, item_id, title, score in data:
+                items.append({
+                    "item_type": item_type,
                     "item_id": item_id,
                     "title": title,
                     "score": score,
                 })
 
-    return response
+    return items
 
 
 def getMovies():
@@ -198,13 +205,17 @@ def getLists():
     lists = []
     with dbapi2.connect(url) as connection:
         with connection.cursor() as cursor:
-            statement = """SELECT ID, NAME, DATE, USERID FROM LIST ORDER BY DATE DESC"""
+            statement = """select l.id, l."name", l.date, u."name" as username 
+                            from list l inner join users u on u.id = l.userid order by l.date desc"""
             cursor.execute(statement)
-            a = cursor.fetchall()
-            for item_id, name, date, user_id in a:
-                list = {"item_id": item_id, "name": name, "date": date}
-                statement = """SELECT NAME FROM USERS WHERE (ID = %s)"""
-                cursor.execute(statement, (user_id,))
-                list["user"] = cursor.fetchone()[0]
+            data = cursor.fetchall()
+            for id, name, date, username in data:
+
+                list = {"list_id": id, "name": name,
+                        "date": date, "user": username,
+                        "items": getListItems(id, limit=5)
+                        }
+
                 lists.append(list.copy())
+
     return lists

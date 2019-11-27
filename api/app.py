@@ -44,7 +44,7 @@ def music(music_id):
 
 @api.route("/list/<list_id>")
 def list(list_id):
-    return jsonify(getList(list_id))
+    return jsonify(getListItems(list_id))
 
 
 @api.route("/login", methods=["POST"])
