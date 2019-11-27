@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Navbar, Nav, Form, FormControl, Button } from "react-bootstrap";
+import { Navbar, Nav, Dropdown } from "react-bootstrap";
 import { Link } from "react-router-dom"
 
 const Topbar = () => {
@@ -10,22 +10,59 @@ const Topbar = () => {
     if (JSON.parse(localStorage.getItem("loggedIn"))) {
       setLoggedIn(true);
       setUser(JSON.parse(localStorage.getItem("username")));
+
+      if (new Date().getTime() >= JSON.parse(localStorage.getItem("exp"))) {
+        fetch("/api/refresh", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer " + JSON.parse(localStorage.getItem("token"))
+          },
+        })
+          .then(response => {
+            if (response.ok)
+              return response.json()
+            else
+              throw new Error("Something went wrong");
+          })
+          .then(res => {
+            localStorage.setItem("exp", new Date().getTime() + (60 * 60 * 1000));
+            localStorage.setItem("token", JSON.stringify(res.access_token));
+          })
+          .catch((error) => console.error(error))
+      }
+
     }
   })
 
   return (
     <Navbar bg="light" expand="lg">
-      <Link to="/" ><Navbar.Brand>
-        Listist
-        </Navbar.Brand></Link>
+      <Link to="/" >
+        <Navbar.Brand>Listist</Navbar.Brand>
+      </Link>
       <Navbar.Toggle aria-controls="basic-navbar-nav" />
       <Navbar.Collapse id="basic-navbar-nav">
         <Nav className="mr-auto">
-          <Navbar.Text><Link to="/movies">Movies</Link></Navbar.Text>
-          <Navbar.Text><Link to="/books">Books</Link></Navbar.Text>
-          <Navbar.Text><Link to="/music">Music</Link></Navbar.Text>
+          <Link to="/movies" className="nav-link">Movies</Link>
+          <Link to="/books" className="nav-link">Books</Link>
+          <Link to="/music" className="nav-link">Music</Link>
         </Nav>
-        {loggedIn ? username : <Navbar.Text><Link to="/login">Login</Link></Navbar.Text>}
+        {loggedIn ? <Dropdown>
+          <Dropdown.Toggle id="dropdown-basic">
+            {username}
+          </Dropdown.Toggle>
+
+          <Dropdown.Menu>
+            <Dropdown.Item onClick={() => {
+              localStorage.removeItem("exp");
+              localStorage.removeItem("loggedIn");
+              localStorage.removeItem("token");
+              localStorage.removeItem("username");
+              setUser(null);
+              setLoggedIn(false);
+            }}>Logout</Dropdown.Item>
+          </Dropdown.Menu>
+        </Dropdown> : <Navbar.Text><Link to="/login">Login</Link></Navbar.Text>}
       </Navbar.Collapse>
     </Navbar>
   )

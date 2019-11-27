@@ -6,6 +6,7 @@ const LoginForm = () => {
 
   const [loggedIn, setLoggedIn] = useState(null);
   const [redirect, setRedirect] = useState(false);
+  const [invalid, setInvalid] = useState(null);
 
   useEffect(() => {
     let isCancelled = false;
@@ -35,15 +36,16 @@ const LoginForm = () => {
     })
       .then(response => {
         if (response.ok)
-          return response.json()
+          return response.json();
         else
-          throw new Error("Something went wrong");
+          setInvalid(true);
       })
       .then(res => {
+
+        localStorage.setItem("exp", new Date().getTime() + (60 * 60 * 1000));
         localStorage.setItem("token", JSON.stringify(res.access_token));
         localStorage.setItem("loggedIn", JSON.stringify(true));
         localStorage.setItem("username", JSON.stringify(res.username));
-        localStorage.setItem("exp", new Date() + (60 * 60 * 1000));
         setLoggedIn(true);
         setRedirect(true);
 
@@ -64,16 +66,18 @@ const LoginForm = () => {
         <Form>
           <Form.Group controlId="formBasicUsername">
             <Form.Label>Username</Form.Label>
-            <Form.Control type="username" name="username" placeholder="Username" />
+            <Form.Control type="username" name="username" placeholder="Username" isInvalid={invalid} />
           </Form.Group>
-
           <Form.Group controlId="formBasicPassword">
             <Form.Label>Password</Form.Label>
-            <Form.Control type="password" name="password" placeholder="Password" />
+            <Form.Control type="password" name="password" placeholder="Password" isInvalid={invalid} />
+            <Form.Control.Feedback type="invalid">
+              Invalid username or password
+            </Form.Control.Feedback>
           </Form.Group>
-          <Form.Group controlId="formBasicCheckbox">
+          {/*<Form.Group controlId="formBasicCheckbox">
             <Form.Check type="checkbox" label="Check me out" />
-          </Form.Group>
+          </Form.Group>*/}
           <Button variant="primary" type="submit" onClick={e => handleSubmit(e)}>
             Submit
           </Button>
