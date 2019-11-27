@@ -7,7 +7,7 @@ def checkLogin(username, password):
     with dbapi2.connect(url) as connection:
         with connection.cursor() as cursor:
             try:
-                statement = """SELECT PASSWORD FROM USERS WHERE NAME = %s"""
+                statement = """SELECT PASSWORD FROM USERS WHERE USERNAME = %s"""
                 cursor.execute(statement, (username,))
                 pw = cursor.fetchone()[0]
                 connection.commit()
@@ -19,15 +19,15 @@ def checkLogin(username, password):
 def createUser(username, password):
     with dbapi2.connect(url) as connection:
         with connection.cursor() as cursor:
-            statement = """INSERT INTO USERS (NAME, PASSWORD) VALUES (%s, %s)"""
+            statement = """INSERT INTO USERS (USERNAME, PASSWORD) VALUES (%s, %s)"""
             cursor.execute(statement, (username, password))
 
 
-def createList(name, date, userid):
+def createList(name, date, username):
     with dbapi2.connect(url) as connection:
         with connection.cursor() as cursor:
-            statement = """INSERT INTO LIST (NAME, DATE, USERID) VALUES (%s, %s, %s)"""
-            cursor.execute(statement, (name, date, userid))
+            statement = """INSERT INTO LIST (NAME, DATE, USERNAME) VALUES (%s, %s, %s)"""
+            cursor.execute(statement, (name, date, username))
             connection.commit()
 
 
@@ -73,6 +73,24 @@ def getListItems(listId, limit=-1, offset=-1):
                 })
 
     return items
+
+
+def getUserLists(username):
+    lists = []
+    with dbapi2.connect(url) as connection:
+        with connection.cursor() as cursor:
+            statement = """select id, "name", date, username from list
+                            where username = '"""+ username + """' order by date desc"""
+            cursor.execute(statement)
+            data = cursor.fetchall()
+            for id, name, date, username in data:
+                list = {"list_id": id, "name": name,
+                        "date": date, "user": username,
+                        "items": getListItems(id, limit=5)
+                        }
+                lists.append(list.copy())
+
+    return lists
 
 
 def getMovies():
@@ -205,8 +223,7 @@ def getLists():
     lists = []
     with dbapi2.connect(url) as connection:
         with connection.cursor() as cursor:
-            statement = """select l.id, l."name", l.date, u."name" as username 
-                            from list l inner join users u on u.id = l.userid order by l.date desc"""
+            statement = """select id, "name", date, username from list order by date desc"""
             cursor.execute(statement)
             data = cursor.fetchall()
             for id, name, date, username in data:

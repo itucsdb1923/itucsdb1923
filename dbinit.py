@@ -278,14 +278,13 @@ INIT_STATEMENTS = [
             VOTES INTEGER DEFAULT 0,
             SINGERID INTEGER REFERENCES PERSON (ID))""",
     """CREATE TABLE USERS (
-            ID SERIAL PRIMARY KEY,
-            NAME VARCHAR(80),
+            USERNAME VARCHAR(80) UNIQUE PRIMARY KEY,
             PASSWORD VARCHAR(80))""",
     """CREATE TABLE LIST (
             ID SERIAL PRIMARY KEY,
             NAME VARCHAR(80),
             DATE DATE,
-            USERID INTEGER REFERENCES USERS (ID))""",
+            USERNAME VARCHAR(80) REFERENCES USERS (USERNAME))""",
     """CREATE TABLE MOVIELIST (
         MOVIEID INTEGER REFERENCES MOVIE (ID),
         LISTID INTEGER REFERENCES LIST (ID))""",
@@ -409,14 +408,14 @@ def initialize(url):
     createUser("ezgiuzun", "00000")
     createUser("enginengin", "123456")
 
-    createList("Begendiklerim", "2019-10-27", 1)
-    createList("Begendiklerim", "2019-10-28", 2)
-    createList("Begendiklerim", "2019-10-25", 3)
-    createList("Begendiklerim", "2019-10-07", 4)
-    createList("Begendiklerim", "2019-09-28", 5)
-    createList("Okuduklarım", "2019-09-27", 3)
-    createList("İzleyeceklerim", "2019-10-29", 1)
-    createList("En İyi Rock", "2019-09-20", 2)
+    createList("Begendiklerim", "2019-10-27", "alperenyucal")
+    createList("Begendiklerim", "2019-10-28", "ismailak")
+    createList("Begendiklerim", "2019-10-25", "enginengin")
+    createList("Begendiklerim", "2019-10-07", "ezgiuzun")
+    createList("Begendiklerim", "2019-09-28", "azizalsancak")
+    createList("Okuduklarım", "2019-09-27", "alperenyucal")
+    createList("İzleyeceklerim", "2019-10-29", "ismailak")
+    createList("En İyi Rock", "2019-09-20", "ezgiuzun")
 
     addListItem("BOOK", 3, 1)
     addListItem("BOOK", 1, 1)

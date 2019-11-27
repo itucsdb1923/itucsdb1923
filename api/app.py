@@ -41,6 +41,11 @@ def book(book_id):
 def music(music_id):
     return jsonify(getMusic(music_id))
 
+@jwt_required
+@api.route("/user/<username>/lists")
+def userlists(username):
+    return jsonify(getUserLists(username))
+
 
 @api.route("/list/<list_id>")
 def list(list_id):
