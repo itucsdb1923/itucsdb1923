@@ -1,7 +1,15 @@
-- Refresh token from react
 - User register api and UX
-- DB list joins
 - Profile page
-- Movie, music and book pages
+- Change password
 - List page
 - Add images
+- Add to list (or create) function and button
+- Delete from list function and button
+- Delete list function and button
+- Home page design
+
+DONE
+- Create list function
+- Movie, music and book pages
+- DB list joins
+- Refresh token from react

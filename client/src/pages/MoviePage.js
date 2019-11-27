@@ -2,14 +2,12 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import MainTemplate from "./MainTemplate";
 import { Accordion, Card, Container, ProgressBar, Button } from 'react-bootstrap';
-//import { useAccordionToggle } from 'react-bootstrap/AccordionToggle';
-
-//const decoratedOnClick = useAccordionToggle(eventKey, onClick);
+import ListButton from "../components/ListButton";
 
 const MoviePage = (props) => {
 
   const [state, setState] = useState({
-    data: []
+    data: [],
   });
 
   useEffect(() => {
@@ -35,23 +33,23 @@ const MoviePage = (props) => {
         <Accordion.Collapse eventKey={item.item_id}>
           <Card.Body>
             <Card.Title>{item.director}</Card.Title>
-          <Card.Text>
-            {"CAST : " + item.cast}
+            <Card.Text>
+              {"CAST : " + item.cast}
+              <br />
+              {"DESCRIPTION : " + item.description}
+              <br />
+            </Card.Text>
+            <div align="middle">
+              <div style={{ width: "50%" }}>
+                {"Listist Score"}
+                <ProgressBar now={item.score * 10} label={`${item.score + " (" + item.votes + ")"}`} />
+                {"Imdb Score"}
+                <ProgressBar variant="warning" now={item.imdb_score * 10} label={`${item.imdb_score}`} />
+              </div></div>
             <br />
-            {"DESCRIPTION : " + item.description}
-            <br />
-          </Card.Text>
-          <div align="middle">
-          <div style={{width : "50%"}}>
-          {"Listist Score"}
-          <ProgressBar now={item.score * 10} label={`${item.score + " (" + item.votes + ")"}`} />
-          {"Imdb Score"}
-          <ProgressBar variant="warning"  now={item.imdb_score * 10} label={`${item.imdb_score}`} />
-          </div></div>
-          <br />
-          <div align="middle">
-          <Button variant="primary">ADD</Button>
-          </div>
+            <div align="middle">
+              <Button variant="primary">ADD</Button>
+            </div>
           </Card.Body>
         </Accordion.Collapse>
       </Card>)
@@ -65,6 +63,10 @@ const MoviePage = (props) => {
           {items}
         </Accordion>
       </Container>
+      <ListButton item={{
+        itemId: 1,
+        type: "BOOK"
+      }} />
     </MainTemplate>
   )
 }

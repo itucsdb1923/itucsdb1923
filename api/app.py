@@ -41,6 +41,7 @@ def book(book_id):
 def music(music_id):
     return jsonify(getMusic(music_id))
 
+
 @jwt_required
 @api.route("/user/<username>/lists")
 def userlists(username):
@@ -50,6 +51,26 @@ def userlists(username):
 @api.route("/list/<list_id>")
 def list(list_id):
     return jsonify(getListItems(list_id))
+
+
+@api.route("/list/additem")
+@jwt_required
+def addItem():
+
+    print(request.args.get("type"),
+        request.args.get("itemId"),
+        request.args.get("listId"),
+        request.args.get("username"),
+        get_jwt_identity()
+        )
+
+    if get_jwt_identity() == request.args.get("username"):
+        type = request.args.get("type")
+        itemId = request.args.get("itemId")
+        listId = request.args.get("listId")
+        addListItem(type, itemId, listId)
+        return jsonify({"msg": "Success"}), 200
+    return jsonify({"msg": "Something went wrong"}), 401
 
 
 @api.route("/login", methods=["POST"])
