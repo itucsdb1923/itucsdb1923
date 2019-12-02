@@ -16,6 +16,21 @@ def checkLogin(username, password):
                 return False
 
 
+def changePassword(username, password, new_password):
+    if checkLogin(username, password):
+        with dbapi2.connect(url) as connection:
+            with connection.cursor() as cursor:
+                try:
+                    statement = """UPDATE USERS SET PASSWORD = %s WHERE (TITLE = %s)"""
+                    cursor.execute(statement, (new_password, password))
+                    connection.commit()
+                    return True
+                except:
+                    return False
+    else:
+        return False            
+
+
 def createUser(username, password):
     with dbapi2.connect(url) as connection:
         with connection.cursor() as cursor:
@@ -41,6 +56,15 @@ def addListItem(type, itemId, listId):
     with dbapi2.connect(url) as connection:
         with connection.cursor() as cursor:
             statement = """INSERT INTO {}LIST ({}ID, LISTID) VALUES (%s, %s)""".format(
+                type, type)
+            cursor.execute(statement, (itemId, listId))
+            connection.commit()
+
+
+def deleteListItem(type, itemId, listId):
+    with dbapi2.connect(url) as connection:
+        with connection.cursor() as cursor:
+            statement = """DELETE {}LIST WHERE (({}ID = %s) AND (LISTID = %s))""".format(
                 type, type)
             cursor.execute(statement, (itemId, listId))
             connection.commit()
