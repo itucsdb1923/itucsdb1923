@@ -19,8 +19,12 @@ def checkLogin(username, password):
 def createUser(username, password):
     with dbapi2.connect(url) as connection:
         with connection.cursor() as cursor:
-            statement = """INSERT INTO USERS (USERNAME, PASSWORD) VALUES (%s, %s)"""
-            cursor.execute(statement, (username, password))
+            try:
+                statement = """INSERT INTO USERS (USERNAME, PASSWORD) VALUES (%s, %s)"""
+                cursor.execute(statement, (username, password))
+                return True
+            except:
+                return False
 
 
 def createList(name, date, username):
@@ -80,7 +84,7 @@ def getUserLists(username):
     with dbapi2.connect(url) as connection:
         with connection.cursor() as cursor:
             statement = """select id, "name", date, username from list
-                            where username = '"""+ username + """' order by date desc"""
+                            where username = '""" + username + """' order by date desc"""
             cursor.execute(statement)
             data = cursor.fetchall()
             for id, name, date, username in data:
