@@ -60,9 +60,10 @@ const Topbar = () => {
               localStorage.removeItem("username");
               setUser(null);
               setLoggedIn(false);
+              location.reload();
             }}>Logout</Dropdown.Item>
           </Dropdown.Menu>
-        </Dropdown> : <Navbar.Text><Link to="/login">Login</Link></Navbar.Text>}
+        </Dropdown> : <Navbar.Text><Link to="/register">Register</Link> / <Link to="/login">Login</Link></Navbar.Text>}
       </Navbar.Collapse>
     </Navbar>
   )

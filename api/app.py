@@ -57,13 +57,6 @@ def list(list_id):
 @jwt_required
 def addItem():
 
-    print(request.args.get("type"),
-        request.args.get("itemId"),
-        request.args.get("listId"),
-        request.args.get("username"),
-        get_jwt_identity()
-        )
-
     if get_jwt_identity() == request.args.get("username"):
         type = request.args.get("type")
         itemId = request.args.get("itemId")
@@ -104,6 +97,24 @@ def refresh():
         "access_token": create_access_token(identity=username, expires_delta=datetime.timedelta(days=14))
     }
     return jsonify(ret), 200
+
+
+@api.route("/register", methods=["POST"])
+def register():
+    if not request.is_json:
+        return jsonify({"msg": "Missing JSON in request"}), 400
+    username = request.json.get('username', None)
+    password = request.json.get('password', None)
+
+    if not username:
+        return jsonify({"msg": "Missing username parameter"}), 400
+    if not password:
+        return jsonify({"msg": "Missing password parameter"}), 400
+
+    if createUser(username, password):
+        return jsonify({"msg":"Success"}), 200
+    else:
+        return jsonify({"msg": "User already exists"}), 401
 
 
 @api.route("/jwttest", methods=['GET'])

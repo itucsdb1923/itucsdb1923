@@ -12,11 +12,9 @@
     "react-bootstrap": "^1.0.0-beta.14",
     "react-dom": "^16.11.0",
     "react-helmet": "^5.2.1",
-    "react-redux": "^7.1.1",
+    "react-icons": "^3.8.0",
     "react-router-dom": "^5.1.2",
-    "redux": "^4.0.4",
-    "redux-persist": "^6.0.0",
-    "redux-thunk": "^2.3.0"
+    "react-star-ratings": "^2.3.0"
   },
   "devDependencies": {
     "@babel/core": "^7.6.4",

@@ -1,72 +1,67 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
 import MainTemplate from "./MainTemplate";
-import { Accordion, Card, Container, ProgressBar, Button } from 'react-bootstrap';
+import { Container, Jumbotron, Image, Row, Col } from "react-bootstrap";
+import Rating from "react-star-ratings";
 
-const BookPage = (props) => {
+export default (props) => {
 
-  const [state, setState] = useState({
-    data: []
-  });
+
+  const [data, setData] = useState({});
 
   useEffect(() => {
     let isCancelled = false;
 
-    fetch("/api/books")
+    fetch("/api/book/" + props.match.params.book_id)
       .then(res => res.json())
-      .then(data => {
+      .then(fetchedData => {
         if (!isCancelled)
-          setState({ data: data })
+          setData(fetchedData);
       })
       .catch((error) => console.error(error));
 
     return () => { isCancelled = true };
   }, []);
 
-  const items = state.data.map((item) => {
-    return (
-      <Card key={item.item_id}>
-        <Accordion.Toggle as={Card.Header} eventKey={item.item_id} align="middle">
-          {item.title + " (" + item.year + ")"}
-        </Accordion.Toggle>
-        <Accordion.Collapse eventKey={item.item_id}>
-          <Card.Body>
-            <Card.Title>{item.author}</Card.Title>
-          <Card.Text>
-            {"CAST : " + item.genre}
-            <br />
-            {"PAGE : " + item.page_num}
-            <br />
-            {"DESCRIPTION : " + item.description}
-            <br />
-          </Card.Text>
-          <div align="middle">
-          <div style={{width : "50%"}}>
-          {"Listist Score"}
-          <ProgressBar now={item.score * 10} label={`${item.score + " (" + item.votes + ")"}`} />
-          </div></div>
-          <br />
-          <div align="middle">
-          <Button variant="primary">ADD</Button>
-          </div>
-          </Card.Body>
-        </Accordion.Collapse>
-      </Card>)
-  })
+
+  let genres;
+
+  if (data.genre != undefined) {
+    genres = <ul>{data.genre.map((item, index) => <li key={index}>{item}</li>)}</ul>
+  }
+
 
   return (
     <MainTemplate>
-      <br /><br />
-      <Container>
-        <Accordion defaultActiveKey="0">
-          {items}
-        </Accordion>
-      </Container>
+      <Jumbotron fluid>
+        <Container>
+          <Row>
+            <Col md="4" lg="4" xl="4">
+              <Image fluid src={"/static/images/" + data.image} />
+            </Col>
+            <Col>
+
+              <h1>{data.title} <small className="text-muted">({data.year})</small></h1>
+
+              <Rating rating={data.score}
+                numberOfStars={10}
+                starDimension="40px"
+                starSpacing="5px"
+                starRatedColor="gold" />
+              <br /><br />
+              <p>
+                {data.description}
+              </p>
+              <b>Author:</b> {data.author}
+              <br />
+              <b>Year:</b> {data.year}
+              <br />
+              <b>Pages:</b> {data.page_num}
+              <br />
+              <b>Genre:</b> {genres}
+            </Col>
+          </Row>
+        </Container>
+      </Jumbotron>
     </MainTemplate>
-  )
+  );
 }
-
-export default BookPage;
-
-
-

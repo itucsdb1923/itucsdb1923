@@ -1,12 +1,9 @@
-- User register api and UX
-- Profile page
-- Change password
-- List page
-- Add images
-- Add to list (or create) function and button
-- Delete from list function and button
-- Delete list function and button
-- Home page design
+- Register redirect and message
+- Remove accordion view (from everywhere)
+- Add item pages
+- Add new views and images to all pages
+- Profile pages
+- Documentation
 
 DONE
 - Create list function

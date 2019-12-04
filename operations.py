@@ -28,7 +28,7 @@ def changePassword(username, password, new_password):
                 except:
                     return False
     else:
-        return False            
+        return False
 
 
 def createUser(username, password):
@@ -114,7 +114,7 @@ def getUserLists(username):
             for id, name, date, username in data:
                 list = {"list_id": id, "name": name,
                         "date": date, "user": username,
-                        "items": getListItems(id, limit=4)
+                        "items": getListItems(id)
                         }
                 lists.append(list.copy())
 
@@ -125,11 +125,11 @@ def getMovies():
     movies = []
     with dbapi2.connect(url) as connection:
         with connection.cursor() as cursor:
-            statement = """SELECT ID, TITLE, DESCRIPTION, YR, IMDBSCORE, SCORE, VOTES, DIRECTORID FROM MOVIE"""
+            statement = """SELECT ID, TITLE, DESCRIPTION, IMAGEURL, YR, IMDBSCORE, SCORE, VOTES, DIRECTORID FROM MOVIE"""
             cursor.execute(statement)
             a = cursor.fetchall()
-            for item_id, title, description, year, imdb_score, score, votes, director_id in a:
-                movie = {"item_id": item_id, "title": title, "description": description,
+            for item_id, title, description, image, year, imdb_score, score, votes, director_id in a:
+                movie = {"item_id": item_id, "title": title, "description": description, "image": image,
                          "year": year, "imdb_score": imdb_score, "score": score, "votes": votes}
                 statement = """SELECT NAME FROM PERSON WHERE (ID = %s)"""
                 cursor.execute(statement, (director_id,))
@@ -149,11 +149,11 @@ def getBooks():
     books = []
     with dbapi2.connect(url) as connection:
         with connection.cursor() as cursor:
-            statement = """SELECT ID, TITLE, DESCRIPTION, YR, PAGENUMBER, SCORE, VOTES, AUTHORID FROM BOOK"""
+            statement = """SELECT ID, TITLE, DESCRIPTION, IMAGEURL, YR, PAGENUMBER, SCORE, VOTES, AUTHORID FROM BOOK"""
             cursor.execute(statement)
             a = cursor.fetchall()
-            for item_id, title, description, year, page_num, score, votes, author_id in a:
-                book = {"item_id": item_id, "title": title, "description": description,
+            for item_id, title, description, image, year, page_num, score, votes, author_id in a:
+                book = {"item_id": item_id, "title": title, "description": description, "image": image,
                         "year": year, "page_num": page_num, "score": score, "votes": votes}
                 statement = """SELECT NAME FROM PERSON WHERE (ID = %s)"""
                 cursor.execute(statement, (author_id,))
@@ -173,11 +173,11 @@ def getMusics():
     musics = []
     with dbapi2.connect(url) as connection:
         with connection.cursor() as cursor:
-            statement = """SELECT ID, TITLE, ALBUM, YR, SCORE, VOTES, SINGERID FROM MUSIC"""
+            statement = """SELECT ID, TITLE, IMAGEURL, ALBUM, YR, SCORE, VOTES, SINGERID FROM MUSIC"""
             cursor.execute(statement)
             a = cursor.fetchall()
-            for item_id, title, album, year, score, votes, singer_id in a:
-                music = {"item_id": item_id, "title": title, "album": album,
+            for item_id, title, image, album, year, score, votes, singer_id in a:
+                music = {"item_id": item_id, "title": title, "image": image, "album": album,
                          "year": year, "score": score, "votes": votes}
                 statement = """SELECT NAME FROM PERSON WHERE (ID = %s)"""
                 cursor.execute(statement, (singer_id,))
@@ -189,12 +189,12 @@ def getMusics():
 def getMovie(movie_id):
     with dbapi2.connect(url) as connection:
         with connection.cursor() as cursor:
-            statement = """SELECT ID, TITLE, DESCRIPTION, YR, IMDBSCORE, SCORE, VOTES, DIRECTORID FROM MOVIE WHERE ID = %s"""
+            statement = """SELECT ID, TITLE, DESCRIPTION, IMAGEURL, YR, IMDBSCORE, SCORE, VOTES, DIRECTORID FROM MOVIE WHERE ID = %s"""
             cursor.execute(statement, (movie_id,))
             a = cursor.fetchall()
-            (item_id, title, description, year,
+            (item_id, title, description, image, year,
              imdb_score, score, votes, director_id) = a[0]
-            movie = {"item_id": item_id, "title": title, "description": description,
+            movie = {"item_id": item_id, "title": title, "description": description, "image": image,
                      "year": year, "imdb_score": imdb_score, "score": score, "votes": votes}
             statement = """SELECT NAME FROM PERSON WHERE (ID = %s)"""
             cursor.execute(statement, (director_id,))
@@ -212,12 +212,12 @@ def getMovie(movie_id):
 def getBook(book_id):
     with dbapi2.connect(url) as connection:
         with connection.cursor() as cursor:
-            statement = """SELECT ID, TITLE, DESCRIPTION, YR, PAGENUMBER, SCORE, VOTES, AUTHORID FROM BOOK WHERE ID = %s"""
+            statement = """SELECT ID, TITLE, DESCRIPTION, IMAGEURL, YR, PAGENUMBER, SCORE, VOTES, AUTHORID FROM BOOK WHERE ID = %s"""
             cursor.execute(statement, (book_id,))
             a = cursor.fetchall()
-            (item_id, title, description, year,
+            (item_id, title, description, image, year,
              page_num, score, votes, author_id) = a[0]
-            book = {"item_id": item_id, "title": title, "description": description,
+            book = {"item_id": item_id, "title": title, "description": description, "image": image,
                     "year": year, "page_num": page_num, "score": score, "votes": votes}
             statement = """SELECT NAME FROM PERSON WHERE (ID = %s)"""
             cursor.execute(statement, (author_id,))
@@ -235,11 +235,12 @@ def getBook(book_id):
 def getMusic(music_id):
     with dbapi2.connect(url) as connection:
         with connection.cursor() as cursor:
-            statement = """SELECT ID, TITLE, ALBUM, YR, SCORE, VOTES, SINGERID FROM MUSIC WHERE ID = %s"""
+            statement = """SELECT ID, TITLE, IMAGEURL, ALBUM, YR, SCORE, VOTES, SINGERID FROM MUSIC WHERE ID = %s"""
             cursor.execute(statement, (music_id,))
             a = cursor.fetchall()
-            (item_id, title, album, year, score, votes, singer_id) = a[0]
-            music = {"item_id": item_id, "title": title, "album": album,
+            (item_id, title, image, album, year,
+             score, votes, singer_id) = a[0]
+            music = {"item_id": item_id, "title": title, "image": image, "album": album,
                      "year": year, "score": score, "votes": votes}
             statement = """SELECT NAME FROM PERSON WHERE (ID = %s)"""
             cursor.execute(statement, (singer_id,))
