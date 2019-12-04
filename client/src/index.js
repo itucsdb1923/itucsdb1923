@@ -8,6 +8,9 @@ import MoviePage from "./pages/MoviePage";
 import BookPage from "./pages/BookPage";
 import MusicPage from "./pages/MusicPage";
 import ListPage from "./pages/ListPage";
+import ProfilePage from "./pages/ProfilePage";
+import ChangePage from "./pages/ChangePage";
+
 
 render((
   <Router>
@@ -18,6 +21,8 @@ render((
       <Route exact path="/books" component={BookPage} />
       <Route exact path="/music" component={MusicPage} />
       <Route exact path="/list/:list_id" component={ListPage} />
+      <Route exact path="/user/:username" component={ProfilePage} />
+      <Route exact path="/change_pw" component={ChangePage} />
       <Route exact path="*">404</Route>
     </Switch>
   </Router>

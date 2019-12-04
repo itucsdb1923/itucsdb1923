@@ -21,8 +21,8 @@ def changePassword(username, password, new_password):
         with dbapi2.connect(url) as connection:
             with connection.cursor() as cursor:
                 try:
-                    statement = """UPDATE USERS SET PASSWORD = %s WHERE (TITLE = %s)"""
-                    cursor.execute(statement, (new_password, password))
+                    statement = """UPDATE USERS SET PASSWORD = %s WHERE (USERNAME = %s)"""
+                    cursor.execute(statement, (new_password, username))
                     connection.commit()
                     return True
                 except:
