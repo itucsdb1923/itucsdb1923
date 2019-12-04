@@ -43,7 +43,7 @@ def music(music_id):
 
 
 @jwt_required
-@api.route("/user/<username>/lists")
+@api.route("/user/<username>")
 def userlists(username):
     return jsonify(getUserLists(username))
 
@@ -84,6 +84,27 @@ def login():
             "access_token": create_access_token(identity=username, expires_delta=datetime.timedelta(days=14))
         }
         return jsonify(ret), 200
+    else:
+        return jsonify({"msg": "Incorrect username or password"}), 401
+
+
+@api.route("/change_pw", methods=["POST"])
+def change_password():
+    if not request.is_json:
+        return jsonify({"msg": "Missing JSON in request"}), 400
+    username = request.json.get('username', None)
+    password = request.json.get('password', None)
+    new_password = request.json.get('new_password', None)
+
+    if not username:
+        return jsonify({"msg": "Missing username parameter"}), 400
+    if not password:
+        return jsonify({"msg": "Missing password parameter"}), 400
+    if not new_password:
+        return jsonify({"msg": "Missing new password parameter"}), 400
+
+    if changePassword(username, password, new_password):
+        return jsonify({"msg": "Password changed succesfully"}), 200
     else:
         return jsonify({"msg": "Incorrect username or password"}), 401
 

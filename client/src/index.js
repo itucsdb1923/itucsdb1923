@@ -12,6 +12,9 @@ import MusicPage from "./pages/MusicPage";
 import AllMusicPage from "./pages/AllMusicPage";
 import ListPage from "./pages/ListPage";
 import RegisterPage from "./pages/RegisterPage";
+import ProfilePage from "./pages/ProfilePage";
+import ChangePage from "./pages/ChangePage";
+
 
 render((
   <Router>
@@ -26,6 +29,8 @@ render((
       <Route exact path="/music" component={AllMusicPage} />
       <Route exact path="/music/:music_id" component={MusicPage} />
       <Route exact path="/list/:list_id" component={ListPage} />
+      <Route exact path="/user/:username" component={ProfilePage} />
+      <Route exact path="/change_pw" component={ChangePage} />
       <Route exact path="*">404</Route>
     </Switch>
   </Router>
