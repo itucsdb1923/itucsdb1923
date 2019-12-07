@@ -43,7 +43,7 @@ def music(music_id):
 
 
 @jwt_required
-@api.route("/user/<username>")
+@api.route("/user/<username>/lists")
 def userlists(username):
     return jsonify(getUserLists(username))
 

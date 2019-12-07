@@ -5,10 +5,11 @@ import { FiPlus, FiMinus } from "react-icons/fi";
 
 const ListButton = ({ itemId, itemType, drop = "down" }) => {
 
-  const [state, setState] = useState({
-    data: [],
-    loggedIn: null,
-  });
+
+  const [data, setData] = useState([]);
+  const [loggedIn, setLoggedIn] = useState(null);
+
+
 
 
   useEffect(() => {
@@ -25,7 +26,7 @@ const ListButton = ({ itemId, itemType, drop = "down" }) => {
         .then(res => res.json())
         .then(data => {
           if (!isCancelled) {
-            setState({ data: data })
+            setData(data)
           }
         })
         .catch((error) => console.error(error));
@@ -55,14 +56,14 @@ const ListButton = ({ itemId, itemType, drop = "down" }) => {
 
   let button = null;
 
-  if (state.data.length != 0)
+  if (data.length != 0)
     button = (
       <Dropdown drop={drop}>
         <Dropdown.Toggle>
           Add to List
         </Dropdown.Toggle>
         <Dropdown.Menu>
-          {state.data.map((list) => {
+          {data.map((list) => {
 
             icon = <FiPlus />;
             list.items.map((item) => {
