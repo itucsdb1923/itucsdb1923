@@ -1,13 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import MainTemplate from "./MainTemplate";
-import { Card, Button, Container } from 'react-bootstrap';
+import { Card, Container, Row, Col } from 'react-bootstrap';
 
 const MainPage = () => {
 
-  const [state, setState] = useState({
-    data: []
-  });
+  const [data, setData] = useState([]);
 
   useEffect(() => {
     let isCancelled = false;
@@ -16,48 +14,51 @@ const MainPage = () => {
       .then(res => res.json())
       .then(data => {
         if (!isCancelled)
-          setState({ data: data })
+          setData(data);
       })
       .catch((error) => console.error(error));
 
     return () => { isCancelled = true };
   }, []);
 
-  const items = state.data.map((item) => {
-    if(item.items.length == 0){return}
-    const subitems = item.items.map((subitem) => {
+  const items = data.map((item) => {
+    if (item.items.length == 0) { return }
+    const subitems = item.items.map((subitem, index) => {
       return (
-        <div class="col-sm-3">
-      <Card style={{ width: '13rem'}}>
-      <Card.Img variant="top" src="holder.js/100px180" />
-        <Card.Body>
-          <Card.Title>{subitem.title}</Card.Title>
-          <Card.Text>
-            {subitem.item_type}
-          </Card.Text>
-        </Card.Body>
-      </Card></div>
-      )})
+        <Col sm={3} lg={3} md={3} xl={3} key={index}>
+          <Card bg="dark" text="white">
+            <Card.Img src={"/static/images/" + subitem.image} />
+            <Card.Body>
+              <Card.Title>{subitem.title}</Card.Title>
+              <Card.Text>
+                {subitem.item_type}
+              </Card.Text>
+            </Card.Body>
+          </Card>
+        </Col>
+      )
+    })
 
     return (
       <div key={item.list_id}>
-      <Container>  
-      <br/>
-        <Card>
-          <Card.Header><div class="row"><div class="col-sm-6"><h3>{item.name}</h3></div><div class="col-sm-6" align="right"><h5>{item.user}</h5></div></div></Card.Header>
-          <Card.Body>
-            <Card.Text align="middle" >
-              <div class="row">
+        <Container>
+          <br />
+          <Card>
+            <Card.Header>
+              <Row>
+                <Col><h4>{item.name}</h4></Col>
+                <Col align="right"><h5>@{item.user}</h5></Col>
+              </Row>
+            </Card.Header>
+            <Card.Body>
+              <Row>
                 {subitems}
+              </Row>
+              <div align="right">
+                <Link to={"list/" + item.list_id}>See All Contents</Link>
               </div>
-            </Card.Text>
-            <div align="right">
-              <Card.Link href={"list/" + item.list_id}>See All Contents</Card.Link>
-              <br/><br/>
-              <Card.Subtitle className="mb-2 text-muted"><h6>{item.date}</h6></Card.Subtitle>
-            </div>
-          </Card.Body>
-        </Card>
+            </Card.Body>
+          </Card>
         </Container>
       </div>)
   })

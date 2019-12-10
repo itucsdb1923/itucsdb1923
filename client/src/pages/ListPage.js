@@ -1,66 +1,54 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import MainTemplate from "./MainTemplate";
-import { Accordion, Card, Container, ProgressBar, Button } from 'react-bootstrap';
+import { Card, CardColumns } from 'react-bootstrap';
+import ListButton from "../components/ListButton";
 
 const ListPage = (props) => {
 
-  const [state, setState] = useState({
-    data: []
-  });
+  const [data, setData] = useState([]);
 
   console.log()
 
   useEffect(() => {
     let isCancelled = false;
 
-    fetch("/api/list/"+props.match.params.list_id)
+    fetch("/api/list/" + props.match.params.list_id)
       .then(res => res.json())
       .then(data => {
         if (!isCancelled)
-          setState({ data: data })
+          setData(data)
       })
       .catch((error) => console.error(error));
 
     return () => { isCancelled = true };
   }, []);
 
-  const items = state.data.map((item) => {
-    return (
-      <Card key={item.item_type + item.item_id}>
-        <Accordion.Toggle as={Card.Header} eventKey={item.item_type + item.item_id} align="middle">
-          {item.title}
-        </Accordion.Toggle>
-        <Accordion.Collapse eventKey={item.item_type + item.item_id}>
+
+  const items = <CardColumns style={{ margin: "20px", columnCount: 5 }}>
+    {data.map((item) => {
+
+      return (
+        <Card bg="dark" text="white" key={item.item_id}>
+          <Card.Img src={"/static/images/" + item.image} />
           <Card.Body>
-            <Card.Title align = 'middle'>{item.item_type}</Card.Title>
-          <div align="middle">
-          <div style={{width : "50%"}}>
-          {"Listist Score"}
-          <ProgressBar now={item.score * 10}/>
-          </div></div>
-          <br />
-          <div align="middle">
-          <Button variant="primary">ADD</Button>
-          </div>
+            <Card.Title >{item.title}</Card.Title>
+            <Card.Text>
+              <Link as={Card.Link} to={"/" + item.item_type + "/" + item.item_id}>See More</Link>
+            </Card.Text>
+            <ListButton drop="up" itemId={item.item_id} itemType={item.item_type} />
           </Card.Body>
-        </Accordion.Collapse>
-      </Card>)
-  })
+        </Card>
+      )
+
+    })}
+  </CardColumns>
 
   return (
     <MainTemplate>
-      <br /><br />
-      <Container>
-        <Accordion defaultActiveKey="0">
-          {items}
-        </Accordion>
-      </Container>
+      {items}
     </MainTemplate>
   )
 }
 
 export default ListPage;
-
-
-

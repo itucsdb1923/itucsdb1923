@@ -74,13 +74,13 @@ def getListItems(listId, limit=-1, offset=-1):
     items = []
     with dbapi2.connect(url) as connection:
         with connection.cursor() as cursor:
-            statement = """select bkl.listid, 'book' as itemtype, bk.id as itemid, bk.title, bk.score
+            statement = """select bkl.listid, 'book' as itemtype, bk.id as itemid, bk.title, bk.score, bk.imageurl
                             from booklist bkl inner join book bk on bkl.bookid = bk.id where listid = %s 
                             union all
-                            select msl.listid, 'music' as itemtype, ms.id as itemid, ms.title, ms.score
+                            select msl.listid, 'music' as itemtype, ms.id as itemid, ms.title, ms.score, ms.imageurl
                             from musiclist msl inner join music ms on msl.musicid = ms.id where listid = %s 
                             union all
-                            select mvl.listid, 'movie' as itemtype, mv.id as itemid, mv.title, mv.score
+                            select mvl.listid, 'movie' as itemtype, mv.id as itemid, mv.title, mv.score, mv.imageurl
                             from movielist mvl inner join movie mv on mvl.movieid = mv.id where listid = %s
                             """
 
@@ -92,12 +92,13 @@ def getListItems(listId, limit=-1, offset=-1):
             cursor.execute(statement, (listId, listId, listId))
             data = cursor.fetchall()
 
-            for list_id, item_type, item_id, title, score in data:
+            for list_id, item_type, item_id, title, score, image in data:
                 items.append({
                     "item_type": item_type,
                     "item_id": item_id,
                     "title": title,
                     "score": score,
+                    "image": image
                 })
 
     return items

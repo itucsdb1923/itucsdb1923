@@ -7,7 +7,6 @@ const ListButton = ({ itemId, itemType, drop = "down" }) => {
 
 
   const [data, setData] = useState([]);
-  const [loggedIn, setLoggedIn] = useState(null);
 
 
 
@@ -56,14 +55,14 @@ const ListButton = ({ itemId, itemType, drop = "down" }) => {
 
   let button = null;
 
-  if (data.length != 0)
+  if (JSON.parse(localStorage.getItem("loggedIn")))
     button = (
       <Dropdown drop={drop}>
         <Dropdown.Toggle>
           Add to List
         </Dropdown.Toggle>
         <Dropdown.Menu>
-          {data.map((list) => {
+          {data.map(list => {
 
             icon = <FiPlus />;
             list.items.map((item) => {
@@ -81,7 +80,6 @@ const ListButton = ({ itemId, itemType, drop = "down" }) => {
           <Dropdown.Divider />
           <Dropdown.Item>Create New List</Dropdown.Item>
         </Dropdown.Menu>
-
       </Dropdown>
 
     );
