@@ -51,7 +51,6 @@ const RegisterForm = () => {
     <Form>
       {success ? "User created. Redirecting to login page." : null}
       {redirect ? <Redirect to="/login" /> : null}
-      <br />
       <Form.Group controlId="formBasicUsername">
         <Form.Label>Username</Form.Label>
         <Form.Control type="username" name="username" placeholder="Username" isInvalid={invalid} />
