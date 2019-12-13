@@ -55,7 +55,7 @@ def createList(name, date, username):
 def addListItem(type, itemId, listId):
     with dbapi2.connect(url) as connection:
         with connection.cursor() as cursor:
-            statement = """INSERT INTO {}LIST ({}ID, LISTID) VALUES (%s, %s)""".format(
+            statement = """INSERT INTO {}list ({}ID, LISTID) VALUES (%s, %s)""".format(
                 type, type)
             cursor.execute(statement, (itemId, listId))
             connection.commit()
@@ -64,7 +64,7 @@ def addListItem(type, itemId, listId):
 def deleteListItem(type, itemId, listId):
     with dbapi2.connect(url) as connection:
         with connection.cursor() as cursor:
-            statement = """DELETE {}LIST WHERE (({}ID = %s) AND (LISTID = %s))""".format(
+            statement = """DELETE FROM {}LIST WHERE (({}ID = %s) AND (LISTID = %s))""".format(
                 type, type)
             cursor.execute(statement, (itemId, listId))
             connection.commit()

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import MainTemplate from "./MainTemplate";
 import { Container, Jumbotron, Image, Row, Col } from "react-bootstrap";
 import Rating from "react-star-ratings";
+import ListButton from "../components/ListButton";
 
 export default (props) => {
 
@@ -53,6 +54,8 @@ export default (props) => {
               <b>Album:</b> {data.album}
               <br />
               <b>Year:</b> {data.year}
+              <br /><br />
+              <ListButton itemId={data.item_id} drop="right" itemType="music" />
             </Col>
           </Row>
         </Container>

@@ -12,6 +12,9 @@ const LoginPage = () => {
     <Maintemplate>
       <Container>
         <LoggedInRedirect>
+          <br/>
+          <h3>Sign In</h3>
+          <br/>
           <LoginForm />
         </LoggedInRedirect>
       </Container>

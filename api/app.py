@@ -53,6 +53,18 @@ def list(list_id):
     return jsonify(getListItems(list_id))
 
 
+@api.route("/createlist")
+@jwt_required
+def newList():
+    username = request.args.get("username")
+    if get_jwt_identity() == username:
+        name = request.args.get("name")
+        date = datetime.datetime.now()
+        createList(name, date, username)
+        return jsonify({"msg": "Success"}), 200
+    return jsonify({"msg": "Something went wrong"}), 401
+
+
 @api.route("/list/additem")
 @jwt_required
 def addItem():
@@ -62,6 +74,19 @@ def addItem():
         itemId = request.args.get("itemId")
         listId = request.args.get("listId")
         addListItem(type, itemId, listId)
+        return jsonify({"msg": "Success"}), 200
+    return jsonify({"msg": "Something went wrong"}), 401
+
+
+@api.route("/list/removeitem")
+@jwt_required
+def removeItem():
+
+    if get_jwt_identity() == request.args.get("username"):
+        type = request.args.get("type")
+        itemId = request.args.get("itemId")
+        listId = request.args.get("listId")
+        deleteListItem(type, itemId, listId)
         return jsonify({"msg": "Success"}), 200
     return jsonify({"msg": "Something went wrong"}), 401
 
@@ -133,7 +158,7 @@ def register():
         return jsonify({"msg": "Missing password parameter"}), 400
 
     if createUser(username, password):
-        return jsonify({"msg":"Success"}), 200
+        return jsonify({"msg": "Success"}), 200
     else:
         return jsonify({"msg": "User already exists"}), 401
 

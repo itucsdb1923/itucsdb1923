@@ -12,6 +12,9 @@ const RegisterPage = () => {
     <Maintemplate>
       <Container>
         <LoggedInRedirect message="You are already a user. Redirecting to the home page.">
+          <br/>
+          <h3>Register</h3>
+          <br />
           <RegisterForm />
         </LoggedInRedirect>
       </Container>

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import MainTemplate from "./MainTemplate";
 import { Card, Container, Row, Col } from 'react-bootstrap';
+import ItemCard from "../components/ItemCard";
 
 const MainPage = () => {
 
@@ -26,15 +27,11 @@ const MainPage = () => {
     const subitems = item.items.map((subitem, index) => {
       return (
         <Col sm={3} lg={3} md={3} xl={3} key={index}>
-          <Card bg="dark" text="white">
-            <Card.Img src={"/static/images/" + subitem.image} />
-            <Card.Body>
-              <Card.Title>{subitem.title}</Card.Title>
-              <Card.Text>
-                {subitem.item_type}
-              </Card.Text>
-            </Card.Body>
-          </Card>
+          <ItemCard
+            id={subitem.item_id}
+            title={subitem.title}
+            image={subitem.image}
+            type={subitem.item_type} />
         </Col>
       )
     })

@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
 import MainTemplate from "./MainTemplate";
-import { Card, CardColumns } from 'react-bootstrap';
-import ListButton from "../components/ListButton";
+import {CardColumns } from 'react-bootstrap';
+import ItemCard from "../components/ItemCard";
+
 
 const ListPage = (props) => {
 
@@ -29,16 +29,12 @@ const ListPage = (props) => {
     {data.map((item) => {
 
       return (
-        <Card bg="dark" text="white" key={item.item_id}>
-          <Card.Img src={"/static/images/" + item.image} />
-          <Card.Body>
-            <Card.Title >{item.title}</Card.Title>
-            <Card.Text>
-              <Link as={Card.Link} to={"/" + item.item_type + "/" + item.item_id}>See More</Link>
-            </Card.Text>
-            <ListButton drop="up" itemId={item.item_id} itemType={item.item_type} />
-          </Card.Body>
-        </Card>
+        <ItemCard
+        key={item.item_type + item.item_id}
+        id={item.item_id}
+        title={item.title}
+        image={item.image}
+        type={item.item_type} />
       )
 
     })}
