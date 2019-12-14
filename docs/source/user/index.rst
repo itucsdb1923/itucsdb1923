@@ -1,16 +1,14 @@
 User Guide
 ==========
 
-**explain how your application works from the user perspective, use
-screenshots whereever appropriate**
+This is our home page. 
 
-**to add a picture, use the following example**::
+.. image:: HomePage.png
+   :scale: 30 %
+   :alt: home page
 
-   .. figure:: picture.png
-      :scale: 50 %
-      :alt: map to buried treasure
+You can browse lists from here. To get more information go to these pages.
 
-      This is the caption of the figure (a simple paragraph).
 
 .. toctree::
 
