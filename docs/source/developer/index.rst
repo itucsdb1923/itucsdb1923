@@ -37,6 +37,9 @@ We used Flask, Postgresql and Reactjs in this project. Our files structure can b
             except:
                 return False
 
+**dbinit.py** wipes the database and creates tables then fills these tables with inital data.
+
+
 .. toctree::
 
    member1
