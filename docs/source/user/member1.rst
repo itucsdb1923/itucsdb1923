@@ -10,7 +10,7 @@ User Login and Register Pages
 The necessary pages to authorize users and provide more content.
 
 .. image:: SignIn.png
-   :scale: 30 %
+   :scale: 40 %
    :alt: sign in page
 
 User Logout
@@ -22,7 +22,6 @@ Add to List Button
 This very functional button can add items to lists remove them back or create a new list. 
 
 .. image:: ListButton.png
-   :scale: 30 %
    :alt: list Button
 
 Item Cards and Cover Images
@@ -30,5 +29,4 @@ Item Cards and Cover Images
 The cards for movies, books and music to make them consistent all across **Listist**.
 
 .. image:: ItemCard.png
-   :scale: 30 %
    :alt: God Father Card
