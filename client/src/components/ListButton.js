@@ -1,14 +1,13 @@
 import React, { useState, useEffect } from "react";
-import { Dropdown, Button } from "react-bootstrap";
+import { Dropdown, Button, Modal, Form } from "react-bootstrap";
 import { FiPlus, FiMinus } from "react-icons/fi";
-
-
 
 
 const ListButton = ({ itemId, itemType, drop = "down" }) => {
 
   const [data, setData] = useState([]);
   const [isInLists, setInLists] = useState([]);
+  const [modalShow, setModalShow] = useState(false);
 
   useEffect(() => {
     let isCancelled = false;
@@ -58,15 +57,28 @@ const ListButton = ({ itemId, itemType, drop = "down" }) => {
       },
     })
       .catch((error) => console.error(error));
+  }
 
-    fetchUserLists();
+  let handleCreate = e => {
+    event.preventDefault();
+
+    let username = JSON.parse(localStorage.getItem("username"));
+    fetch("/api/createlist?" + "username=" + username + "&name=" + e.target[0].value, {
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + JSON.parse(localStorage.getItem("token"))
+      },
+    })
+      .catch((error) => console.error(error));
+
+    setModalShow(false);
   }
 
   let button = null;
 
   if (JSON.parse(localStorage.getItem("loggedIn")))
     button = (
-      <Dropdown drop={drop}>
+      <Dropdown drop={drop} onClick={()=>{fetchUserLists()}}>
         <Dropdown.Toggle>
           Add to List
         </Dropdown.Toggle>
@@ -87,6 +99,37 @@ const ListButton = ({ itemId, itemType, drop = "down" }) => {
               </Dropdown.Item>
             )
           })}
+          <Dropdown.Divider />
+          <Dropdown.Item onClick={() => { setModalShow(true) }}>
+            Create List
+          </Dropdown.Item>
+
+          <Modal
+            size="lg"
+            aria-labelledby="contained-modal-title-vcenter"
+            centered
+            show={modalShow}
+            onHide={() => { setModalShow(false) }}
+          >
+            <Modal.Header closeButton>
+              <Modal.Title id="contained-modal-title-vcenter">
+                Create New List
+              </Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+              <Form onSubmit={e => handleCreate(e)}>
+                <Form.Group controlId="formBasicUsername">
+                  <Form.Control placeholder="List Name" />
+                </Form.Group>
+
+                <Button variant="primary" type="submit">
+                  Create
+                </Button>
+                <br />
+              </Form>
+            </Modal.Body>
+
+          </Modal>
 
         </Dropdown.Menu>
       </Dropdown>
