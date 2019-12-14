@@ -19,7 +19,7 @@ We used Flask, Postgresql and Reactjs in this project. Our files structure can b
 
 .. image:: FS.png
 
-**Api** folder is the backend service of our project. We connect Reactjs to flask using the api. The api is served in *<host address>/api*.
+**Api** folder is the backend service of our project. We connect Reactjs to flask using the api. The api is served at *<host address>/api*.
 
 **Client** folder contains our react code. Source code of all the pages you can see are stored here.
 
@@ -39,6 +39,7 @@ We used Flask, Postgresql and Reactjs in this project. Our files structure can b
 
 **dbinit.py** wipes the database and creates tables then fills these tables with inital data.
 
+To get more information go to the links below.
 
 .. toctree::
 

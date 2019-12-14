@@ -7,7 +7,7 @@ This is our home page.
    :scale: 30 %
    :alt: home page
 
-You can browse lists from here. To get more information go to these pages.
+You can browse lists from here. To get more information go to the links below.
 
 
 .. toctree::
