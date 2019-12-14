@@ -4,7 +4,7 @@ Developer Guide
 Database Design
 ---------------
 
-.. image:: picture.png
+.. image:: ER.png
 
 Our database has three main tables that contain books (**Book**), movies (**Movie**) and music (**Music**). These tables store the specifics of items such as *item title*, *cover image* etc. All three tables are in a relation with the **Person** table. Person table contains all kind of people like actors, authors, directors etc. 
 Additionally **Book** table has many to many relationship with **Genre** table. **Movie** table has a many to many relationship as well. It is connected to **Person** table through **Casting** table.
@@ -15,16 +15,27 @@ Additionally **Book** table has many to many relationship with **Genre** table. 
 Code
 ----
 
-**explain the technical structure of your code**
+We used Flask, Postgresql and Reactjs in this project. Our files structure can be seen below.
 
-**to include a code listing, use the following example**::
+.. image:: FS.png
 
-   .. code-block:: python
+**Api** folder is the backend service of our project. We connect Reactjs to flask using the api. The api is served in *<host address>/api*.
 
-      class Foo:
+**Client** folder contains our react code. Source code of all the pages you can see are stored here.
 
-         def __init__(self, x):
-            self.x = x
+**operations.py** file holds all database operations we use in this project. Such as *createUser* function below.
+
+.. code-block:: python
+
+  def createUser(username, password):
+    with dbapi2.connect(url) as connection:
+        with connection.cursor() as cursor:
+            try:
+                statement = """INSERT INTO USERS (USERNAME, PASSWORD) VALUES (%s, %s)"""
+                cursor.execute(statement, (username, password))
+                return True
+            except:
+                return False
 
 .. toctree::
 
