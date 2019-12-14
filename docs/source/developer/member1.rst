@@ -7,11 +7,11 @@ The tables needed to create many to many relationships between **List** table an
 
 List CRUD Operations
 """"""""""""""""""""
-The functions to make database crud operations for lists.
+The functions to do database crud operations for lists.
 
 React Client Project Setup
 """"""""""""""""""""""""""
-Webpack, React.js and Bootstrap setup. 
+Webpack, React.js and Bootstrap setup.
 
 Register and Login
 """"""""""""""""""
@@ -20,3 +20,7 @@ Both API and forntend for register and login operations.
 Add to List Button
 """"""""""""""""""
 This functional button can add or remove items and create lists.
+
+JWT Implementation
+""""""""""""""""""
+Stateless user authentication using *flask_JWT_extended*.
