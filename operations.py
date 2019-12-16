@@ -120,6 +120,22 @@ def getUserLists(username):
                 lists.append(list.copy())
 
     return lists
+def getProfileLists(username):
+    lists = []
+    with dbapi2.connect(url) as connection:
+        with connection.cursor() as cursor:
+            statement = """select id, "name", date, username from list
+                            where username = '""" + username + """' order by date desc"""
+            cursor.execute(statement)
+            data = cursor.fetchall()
+            for id, name, date, username in data:
+                list = {"list_id": id, "name": name,
+                        "date": date, "user": username,
+                        "items": getListItems(id, limit=4)
+                        }
+                lists.append(list.copy())
+
+    return lists
 
 
 def getMovies():

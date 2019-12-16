@@ -29,7 +29,7 @@ render((
       <Route exact path="/music" component={AllMusicPage} />
       <Route exact path="/music/:music_id" component={MusicPage} />
       <Route exact path="/list/:list_id" component={ListPage} />
-      <Route exact path="/user/:username" component={ProfilePage} />
+      <Route exact path="/profile" component={ProfilePage} />
       <Route exact path="/change_pw" component={ChangePage} />
       <Route exact path="*">404</Route>
     </Switch>

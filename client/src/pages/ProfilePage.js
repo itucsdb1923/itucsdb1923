@@ -12,7 +12,7 @@ const ProfilePage = (props) => {
   useEffect(() => {
     let isCancelled = false;
 
-    fetch("/api/user/"+props.match.params.username)
+    fetch("/api/" + JSON.parse(localStorage.getItem("username")))
       .then(res => res.json())
       .then(data => {
         if (!isCancelled)

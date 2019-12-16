@@ -47,6 +47,12 @@ def music(music_id):
 def userlists(username):
     return jsonify(getUserLists(username))
 
+    
+@jwt_required
+@api.route("/<username>")
+def profilelists(username):
+    return jsonify(getProfileLists(username))
+
 
 @api.route("/list/<list_id>")
 def list(list_id):
