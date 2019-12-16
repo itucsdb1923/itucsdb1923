@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import MainTemplate from "./MainTemplate";
-import { Card, Button, Container } from 'react-bootstrap';
+import { Card, Button, Container, Row, Col } from 'react-bootstrap';
+import List from "../components/List";
+import ItemCard from "../components/ItemCard";
+import NotLoggedInRedirect from "../components/NotLoggedInRedirect";
 
 const ProfilePage = (props) => {
 
@@ -24,55 +27,47 @@ const ProfilePage = (props) => {
   }, []);
 
   const items = state.data.map((item) => {
-    if(item.items.length == 0){return}
-    const subitems = item.items.map((subitem) => {
+    const subitems = item.items.map((subitem, index) => {
       return (
-        <div class="col-sm-3">
-      <Card style={{ width: '13rem'}}>
-      <Card.Img variant="top" src="holder.js/100px180" />
-        <Card.Body>
-          <Card.Title>{subitem.title}</Card.Title>
-          <Card.Text>
-            {subitem.item_type}
-          </Card.Text>
-        </Card.Body>
-      </Card></div>
-      )})
+        <Col sm={3} lg={3} md={3} xl={3} key={index}>
+          <ItemCard
+            id={subitem.item_id}
+            title={subitem.title}
+            image={subitem.image}
+            type={subitem.item_type} />
+        </Col>
+      )
+    })
 
     return (
       <div key={item.list_id}>
-        <div class="row">
-          <div class="col-sm-2 bg-light" align="middle">
-            <br/><br/>
-            <Button variant="outline-secondary"><Link to="/change_pw">Change Password</Link></Button>
-          </div>
-          <div class="col-sm-10">
-            <Container>  
-            <br/>
-              <Card>
-                <Card.Header><div class="row"><div class="col-sm-6"><h3>{item.name}</h3></div><div class="col-sm-6" align="right"><h5>{item.user}</h5></div></div></Card.Header>
-                <Card.Body>
-                  <Card.Text align="middle" >
-                    <div class="row">
-                      {subitems}
-                    </div>
-                  </Card.Text>
-                  <div align="right">
-                    <Link to={"/list/" + item.list_id}>See All Contents</Link>
-                    <br/><br/>
-                    <Card.Subtitle className="mb-2 text-muted"><h6>{item.date}</h6></Card.Subtitle>
-                  </div>
-                </Card.Body>
-              </Card>
-              </Container>
-          </div>
-        </div>
+        <Container>
+          <br />
+          <List name={item.name} user={item.user} list_id={item.list_id} showDelete>
+            {subitems}
+          </List>
+        </Container>
       </div>)
   })
 
   return (
     <MainTemplate>
-      {items}
+      <NotLoggedInRedirect >
+
+        <div align="middle">
+          <br />
+          <Button variant="outline-secondary">
+            <Link style={{
+              color: "black",
+              textDecoration: "none"
+            }}
+              to="/change_pw">
+              Change Password
+                </Link>
+          </Button>
+        </div>
+        {items}
+      </NotLoggedInRedirect>
     </MainTemplate>
   )
 }

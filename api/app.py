@@ -97,6 +97,16 @@ def removeItem():
     return jsonify({"msg": "Something went wrong"}), 401
 
 
+@api.route("/deletelist")
+@jwt_required
+def removeList():
+    if get_jwt_identity() == request.args.get("username"):
+        listId = request.args.get("listId")
+        deleteList(listId)
+        return jsonify({"msg": "Success"}), 200
+    return jsonify({"msg": "Something went wrong"}), 401
+
+
 @api.route("/login", methods=["POST"])
 def login():
     if not request.is_json:

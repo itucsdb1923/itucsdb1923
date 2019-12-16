@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
 import MainTemplate from "./MainTemplate";
-import { Card, Container, Row, Col } from 'react-bootstrap';
+import {  Container,  Col } from 'react-bootstrap';
 import ItemCard from "../components/ItemCard";
+import List from "../components/List";
 
 const MainPage = () => {
 
@@ -40,22 +40,9 @@ const MainPage = () => {
       <div key={item.list_id}>
         <Container>
           <br />
-          <Card>
-            <Card.Header>
-              <Row>
-                <Col><h4>{item.name}</h4></Col>
-                <Col align="right"><h5>@{item.user}</h5></Col>
-              </Row>
-            </Card.Header>
-            <Card.Body>
-              <Row>
-                {subitems}
-              </Row>
-              <div align="right">
-                <Link to={"list/" + item.list_id}>See All Contents</Link>
-              </div>
-            </Card.Body>
-          </Card>
+          <List name={item.name} user={item.user} list_id={item.list_id}>
+            {subitems}
+          </List>
         </Container>
       </div>)
   })

@@ -1,14 +1,28 @@
 import React from "react";
-import { Card } from "react-bootstrap";
+import { Card, Row, Col } from "react-bootstrap";
+import { Link } from "react-router-dom";
+import DeleteList from "../components/DeleteList"
 
-const List = (props) => {
+const List = ({ name, user, list_id, children, showDelete = false }) => {
 
 
   return (
-    <Card className="mb-3">
-      <Card.Header>{props.data.name}</Card.Header>
-      <Card.Body>{props.children}</Card.Body>
-      <Card.Footer>@{props.data.user}</Card.Footer>
+    <Card>
+      <Card.Header>
+        <Row>
+          <Col><h4>{name}</h4></Col>
+          <Col align="right"><h5>@{user}</h5></Col>
+        </Row>
+      </Card.Header>
+      <Card.Body>
+        <Row>
+          {children}
+        </Row>
+        <div align="right">
+          <Link to={"list/" + list_id}>See All Contents</Link>
+        </div>
+      </Card.Body>
+      {showDelete ? <Card.Footer><DeleteList listId={list_id} /></Card.Footer> : null}
     </Card>
   )
 }

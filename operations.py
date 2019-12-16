@@ -50,6 +50,20 @@ def createList(name, date, username):
             connection.commit()
 
 
+def deleteList(list_id):
+    with dbapi2.connect(url) as connection:
+        with connection.cursor() as cursor:
+            statements = [
+                """DELETE FROM BOOKLIST WHERE(LISTID = {})""".format(list_id),
+                """DELETE FROM MOVIELIST WHERE(LISTID = {})""".format(list_id),
+                """DELETE FROM MUSICLIST WHERE(LISTID = {})""".format(list_id),
+                """DELETE FROM LIST WHERE(ID = {})""".format(list_id),
+                ]
+            for statement in statements:
+                cursor.execute(statement)
+            connection.commit()
+
+
 # add a list item with given type to a list.
 # type should be one of these: "BOOK", "MUSIC", "MOVIE"
 def addListItem(type, itemId, listId):
@@ -120,6 +134,8 @@ def getUserLists(username):
                 lists.append(list.copy())
 
     return lists
+
+
 def getProfileLists(username):
     lists = []
     with dbapi2.connect(url) as connection:

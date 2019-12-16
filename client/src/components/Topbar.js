@@ -62,6 +62,12 @@ const Topbar = () => {
               setLoggedIn(false);
               location.reload();
             }}>Logout</Dropdown.Item>
+            <Dropdown.Item>
+              <Link to="/profile" style={{
+                color: "black",
+                textDecoration: "none",
+              }}>Profile</Link>
+            </Dropdown.Item>
           </Dropdown.Menu>
         </Dropdown> : <Navbar.Text><Link to="/register">Register</Link> / <Link to="/login">Login</Link></Navbar.Text>}
       </Navbar.Collapse>
